@@ -19,20 +19,12 @@ public class ActuatorManager {
 
     public void activateActuator(String id) {
         Actuator a = getActuator(id);
-        if (a != null) {
-            a.activate();
-        } else {
-            System.out.println("Actuator not found.");
-        }
+        if (a != null) a.activate();
     }
 
     public void deactivateActuator(String id) {
         Actuator a = getActuator(id);
-        if (a != null) {
-            a.deactivate();
-        } else {
-            System.out.println("Actuator not found.");
-        }
+        if (a != null) a.deactivate();
     }
 
     public void listActuators() {
