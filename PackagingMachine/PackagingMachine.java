@@ -1,3 +1,5 @@
+import java.time.LocalDateTime;
+
 public class PackagingMachine extends Actuator {
 
     public PackagingMachine(String id) {
@@ -7,22 +9,26 @@ public class PackagingMachine extends Actuator {
     @Override
     public void activate() {
         super.activate();
-        System.out.println("PackagingMachine " + id + " is ready for packaging.");
+        System.out.println("Packaging machine " + id + " ready.");
     }
 
     @Override
     public void deactivate() {
         super.deactivate();
-        System.out.println("PackagingMachine " + id + " stopped.");
+        System.out.println("Packaging machine " + id + " stopped.");
     }
 
-    public void packageItem(ProductItem item) {
-        if (!isActive) {
-            System.out.println("Cannot package. Machine is OFF.");
-            return;
-        }
+    @Override
+    public void onTick(LocalDateTime currentTime) {
+        if (isActive) {
+            if (lastActionTime == null ||
+                currentTime.minusSeconds(3).isAfter(lastActionTime)) {
 
-        System.out.println("Packaging item: " + item.getName());
-        
+                System.out.println("[" + id + "] Packaging items...");
+                lastActionTime = currentTime;
+
+                //the next logic will goes here ....
+            }
+        }
     }
 }
