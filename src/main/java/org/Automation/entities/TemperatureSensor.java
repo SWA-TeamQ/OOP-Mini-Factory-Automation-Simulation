@@ -1,6 +1,6 @@
 package org.Automation.entities;
 
-import org.Automation.controllers.SimulationClock;
+import org.Automation.Controllers.Simulators.SimulationClock;
 import java.time.LocalDateTime;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -39,14 +39,10 @@ public class TemperatureSensor extends Sensor implements SimulationClock.ClockOb
         SimulationClock.getInstance().register(this);
     }
 
-    public TemperatureSensor(String sensorType, int location, String status, 
-                           double minTemperature, double maxTemperature) {
-        this(sensorType, String.valueOf(location), status, minTemperature, maxTemperature, "°C");
-    }
 
     @Override
     public void onTick(LocalDateTime currentTime) {
-        if (lastActionTime == null || currentTime.minusSeconds(5).isAfter(lastActionTime)) {
+        if (lastActionTime == null || currentTime.minusSeconds(1).isAfter(lastActionTime)) {
             if (isActive() && !maxReached) {
                 performTemperatureCycle();
             }
@@ -118,7 +114,7 @@ public class TemperatureSensor extends Sensor implements SimulationClock.ClockOb
     }
 
     public double simulateTemperature() {
-        this.currentTemperature += temperatureIncrement;
+       // this.currentTemperature += temperatureIncrement;
         
         if (currentTemperature > maxTemperature) {
             currentTemperature = maxTemperature;
@@ -168,7 +164,7 @@ public class TemperatureSensor extends Sensor implements SimulationClock.ClockOb
         deactivateSensor();
     }
     
-    public boolean isRunning() {
+    public boolean isRunning() { 
         return isActive();
     }
 
