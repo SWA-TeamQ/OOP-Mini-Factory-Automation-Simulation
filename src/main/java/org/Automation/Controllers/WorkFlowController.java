@@ -1,54 +1,43 @@
 package org.Automation.Controllers;
 
 import ProductionLine.ProductionLine;
+
 import org.Automation.Controllers.Simluators.SimulationClock;
+import org.Automation.Controllers.Simluators.SimulationEngine;
 
 import java.time.LocalDateTime;
 
 /**
  
- * - starts/stops production line
- * - starts/stops global SimulationClock
+ 
  * - exposes a simple onSensorEvent hook that sensors/managers can call
  */
 public class WorkFlowController {
 
     private final ProductionLine productionLine;
+    private final SimulationEngine simulationEngine;
     private boolean running = false;
 
-    public WorkFlowController(ProductionLine productionLine) {
+   public WorkFlowController(ProductionLine productionLine, SimulationEngine simulationEngine) {
         this.productionLine = productionLine;
+        this.simulationEngine = simulationEngine;
     }
 
-    public synchronized void startProduction() {
+     public synchronized void startProduction() {
         if (running) return;
+
         System.out.println("[WorkFlowController] Starting production...");
-        try {
-            productionLine.startLine();
-        } catch (Exception ex) {
-            System.err.println("[WorkFlowController] productionLine.startLine() error: " + ex.getMessage());
-        }
-        try {
-            SimulationClock.getInstance().start();
-        } catch (Exception ex) {
-            System.err.println("[WorkFlowController] SimulationClock.start() error: " + ex.getMessage());
-        }
+        productionLine.startLine();
+        simulationEngine.startSimulation();   
         running = true;
     }
 
     public synchronized void stopProduction() {
         if (!running) return;
+
         System.out.println("[WorkFlowController] Stopping production...");
-        try {
-            productionLine.stopLine();
-        } catch (Exception ex) {
-            System.err.println("[WorkFlowController] productionLine.stopLine() error: " + ex.getMessage());
-        }
-        try {
-            SimulationClock.getInstance().stop();
-        } catch (Exception ex) {
-            System.err.println("[WorkFlowController] SimulationClock.stop() error: " + ex.getMessage());
-        }
+        productionLine.stopLine();
+        simulationEngine.stopSimulation();  
         running = false;
     }
 
