@@ -1,4 +1,4 @@
-package org.Automation.entities;
+package org.automation.entities;
 
 public class Sensor {
     public int id;

@@ -1,16 +1,15 @@
-package org.Automation.repositories;
+package org.automation.repositories;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.Automation.DatabaseManager;
-import org.Automation.entities.Worker;
+import org.automation.database.DatabaseManager;
+import org.automation.entities.Worker;
 
 public class WorkerRepository extends Repository<Worker> {
     public WorkerRepository(DatabaseManager db) {
         super("Worker", db);
     }
-    
 
     @Override
     public Worker mapRow(ResultSet rs) throws SQLException {

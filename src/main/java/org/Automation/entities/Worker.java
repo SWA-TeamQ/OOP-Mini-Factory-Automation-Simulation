@@ -1,4 +1,4 @@
-package org.Automation.entities;
+package org.automation.entities;
 
 public class Worker {
     public int id;

@@ -1,8 +1,5 @@
-package WorkflowController;
-import ProductionLine.ProductionLine;
-import SensorManager.SensorManager;
-import ActuatorManager.ActuatorManager;
-import ItemTracker.ItemTracker;
+package org.automation.controllers;
+
 public class WorkflowController {
 	//Instance Variables
 	private ProductionLine productionLine;
