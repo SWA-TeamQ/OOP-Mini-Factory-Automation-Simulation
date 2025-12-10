@@ -1,12 +1,14 @@
-package ConsoleUI;
-import Sim_Engine.SimulationEngine;
-import WorkflowController.WorkflowController;
-import Logger.Logger;
+package org.automation.ui;
+import org.automation.engine.SimulationEngine;
+import org.automation.controllers.WorkflowController;
+import org.automation.utils.Logger;
+
 public class ConsoleApp extends ConsoleUI {
 	//Instance Variables
 	private SimulationEngine simulationEngine;
 	private WorkflowController controller;
 	private Logger logger;
+	
 	ConsoleApp(){
 		simulationEngine= new SimulationEngine();
 	}

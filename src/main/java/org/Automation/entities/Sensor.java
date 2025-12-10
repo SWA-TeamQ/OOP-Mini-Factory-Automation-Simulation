@@ -1,4 +1,4 @@
-package org.Automation.entities;
+package org.automation.entities;
 
 public abstract class Sensor {
     private static int idCounter = 0;
