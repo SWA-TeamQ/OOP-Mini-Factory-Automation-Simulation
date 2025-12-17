@@ -7,7 +7,6 @@ public class ConsoleApp extends ConsoleUI {
 	//Instance Variables
 	private SimulationEngine simulationEngine;
 	private WorkflowController controller;
-	private Logger logger;
 	
 	ConsoleApp(){
 		simulationEngine= new SimulationEngine();

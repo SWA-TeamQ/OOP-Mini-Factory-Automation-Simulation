@@ -7,7 +7,7 @@ public class SimulationEngine {
 	//Instance Variables
 	
 	WorkflowController controller;
-	Logger logger;
+
 	
 	//Instance Methods
 	public void runStep() {

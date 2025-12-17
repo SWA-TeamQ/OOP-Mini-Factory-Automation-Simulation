@@ -11,17 +11,14 @@ import org.automation.entities.ProductItem;
 public class ItemTracker {
     private final Map<Integer, ProductItem> items = new ConcurrentHashMap<>();
     private int nextId = 1;
-    private final Logger logger;
-
-    public ItemTracker(Logger logger){
-        this.logger = logger;
+    public ItemTracker(){
     };
 
     public synchronized ProductItem addItem(ProductItem item) {
         int id = nextId++;
         item.setId(id);
         items.put(id, item);
-        logger.log("ProductItem", id, "created", "Item created: " + item.getName());
+        Logger.log("ProductItem", id, "created", "Item created: " + item.getName());
         return item;
     }
 
@@ -38,7 +35,7 @@ public class ItemTracker {
         if (it == null) return false;
         String prev = it.getStatus();
         it.setStatus(status);
-        logger.log("ProductItem", id, "status_update", "Status changed: " + prev + " -> " + status);
+        Logger.log("ProductItem", id, "status_update", "Status changed: " + prev + " -> " + status);
         return true;
     }
 
@@ -47,7 +44,7 @@ public class ItemTracker {
         if (it == null) return false;
         int prev = it.getCurrentStationId();
         it.setCurrentStationId(stationId);
-        logger.log("ProductItem", id, "moved", "Moved from station " + prev + " to " + stationId);
+        Logger.log("ProductItem", id, "moved", "Moved from station " + prev + " to " + stationId);
         return true;
     }
 }

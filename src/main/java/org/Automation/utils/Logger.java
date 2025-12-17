@@ -22,29 +22,28 @@ class Log {
 }
 
 public class Logger {
-    private DatabaseManager db;
+    private static DatabaseManager db;
 
     public Logger(DatabaseManager db) {
-        this.db = db;
+        Logger.db = db;
     }
 
-    public void logProduct(ProductItem item) {
+    public static void logProduct(ProductItem item) {
 
     }
 
-    public void log(String componentType, int componentId, String eventType, String message) {
+    public static void log(String componentType, int componentId, String eventType, String message) {
         System.out.println(componentType + " [" + componentId + "] " + eventType + ": " + message);
     }
 
-    public void logError(String error) {
+    public static void logError(String error) {
+    }
+
+    public static void clear() {
 
     }
 
-    public void clear() {
-
-    }
-
-    public void print() {
+    public static void print() {
 
     }
 
