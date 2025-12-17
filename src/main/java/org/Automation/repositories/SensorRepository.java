@@ -1,10 +1,10 @@
-package org.Automation.repositories;
+package org.automation.repositories;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.Automation.DatabaseManager;
-import org.Automation.entities.Sensor;
+import org.automation.database.DatabaseManager;
+import org.automation.entities.Sensor;
 
 public class SensorRepository extends Repository<Sensor> {
     public SensorRepository(DatabaseManager db) {

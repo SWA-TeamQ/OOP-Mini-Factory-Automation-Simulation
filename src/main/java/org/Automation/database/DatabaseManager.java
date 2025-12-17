@@ -1,33 +1,13 @@
-package org.Automation;
+package org.automation.database;
 
+import java.lang.ref.Cleaner;
 import java.sql.*;
 
-interface DatabaseManagerInterface {
-
-  boolean connect();
-
-  Connection getConnection();
-
-  boolean disconnect();
-
-  ResultSet find(String tableName, String where, Object[] params);
-
-  boolean insert(String tableName, String[] columns, Object[] values);
-
-  boolean delete(String tableName, String where, Object[] params);
-
-  boolean update(String tableName, String setClause, String where, Object[] params);
-}
-
-public final class DatabaseManager implements DatabaseManagerInterface {
+public final class DatabaseManager {
 
   private Connection connection;
   private final String url = "jdbc:sqlite:automation.sqlite";
 
-  public DatabaseManager() {
-  }
-
-  @Override
   public boolean connect() {
     if (connection != null)
       return true;
@@ -41,12 +21,10 @@ public final class DatabaseManager implements DatabaseManagerInterface {
     }
   }
 
-  @Override
   public Connection getConnection() {
     return this.connection;
   }
 
-  @Override
   public boolean disconnect() {
     try {
       if (connection != null) {
@@ -91,7 +69,6 @@ public final class DatabaseManager implements DatabaseManagerInterface {
   }
 
   // ------------ Find (SELECT) -------------
-  @Override
   public ResultSet find(String tableName, String where, Object[] params) {
     String sql = "SELECT * FROM " + tableName;
 
@@ -103,7 +80,6 @@ public final class DatabaseManager implements DatabaseManagerInterface {
   }
 
   // ------------ INSERT -------------
-  @Override
   public boolean insert(String tableName, String[] columns, Object[] values) {
 
     if (columns.length != values.length)
@@ -127,7 +103,6 @@ public final class DatabaseManager implements DatabaseManagerInterface {
   }
 
   // ------------ DELETE -------------
-  @Override
   public boolean delete(String tableName, String where, Object[] params) {
     String sql = "DELETE FROM " + tableName +
         (where != null ? " WHERE " + where : "");
@@ -136,12 +111,15 @@ public final class DatabaseManager implements DatabaseManagerInterface {
   }
 
   // ------------ UPDATE -------------
-  @Override
   public boolean update(String tableName, String setClause, String where, Object[] params) {
 
     String sql = "UPDATE " + tableName + " SET " + setClause +
         (where != null ? " WHERE " + where : "");
 
     return executeMutator(sql, params);
+  }
+
+  void Cleaner(){
+    disconnect();
   }
 }
