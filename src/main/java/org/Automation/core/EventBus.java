@@ -1,8 +1,8 @@
 package org.automation.core;
 
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
@@ -15,10 +15,11 @@ import java.util.function.Consumer;
  * Keep intentionally minimal; replace with a proper messaging implementation
  * (e.g. RxJava / Reactor / Guava EventBus) if requirements grow.
  */
+
 public class EventBus {
     private static final EventBus INSTANCE = new EventBus();
 
-    private final Map<Class<?>, List<Consumer<Object>>> listeners = new ConcurrentHashMap<>();
+    private final Map<Class<?>, List<Consumer<Object>>> listeners = new HashMap<>();
 
     private EventBus() {}
 

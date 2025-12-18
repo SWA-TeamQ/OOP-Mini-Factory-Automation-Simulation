@@ -2,11 +2,6 @@ package org.automation.services;
 
 import java.time.LocalDateTime;
 
-/**
- * Minimal ProductionLineService scaffold implementing IProductionLineService.
- * Keeps internal running state and provides tick hook for WorkflowController.
- * Extend with real repository/logic in follow-up commits.
- */
 public class ProductionLineService implements IProductionLineService {
 
     private volatile boolean running = false;
@@ -15,7 +10,6 @@ public class ProductionLineService implements IProductionLineService {
     @Override
     public void onTick(LocalDateTime time) {
         if (!running) return;
-        // TODO: advance items on the line, interact with stations, schedule actuators
         System.out.println("[ProductionLineService] tick at " + time + " — processing pending work.");
     }
 

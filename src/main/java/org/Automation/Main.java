@@ -1,6 +1,5 @@
 package org.automation;
 
-import org.automation.controllers.ItemTracker;
 import org.automation.core.DatabaseManager;
 import org.automation.core.Logger;
 import org.automation.entities.ProductItem;

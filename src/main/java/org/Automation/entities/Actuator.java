@@ -1,30 +1,33 @@
 package org.automation.entities;
 
-public class Actuator {
+public abstract class Actuator {
+    protected int id;
+    protected String name;
+    protected boolean active;
 
-    protected String id;
-    protected boolean isActive;
-
-    public Actuator(String id) {
+    public Actuator(int id, String name) {
         this.id = id;
-        this.isActive = false;
+        this.name = name;
+        this.active = false;
     }
 
     public void activate() {
-        isActive = true;
-        System.out.println(id + " activated.");
+        active = true;
+        System.out.println(this.toShortString() + " activated.");
     }
 
     public void deactivate() {
-        isActive = false;
-        System.out.println(id + " deactivated.");
+        active = false;
+        System.out.println(this.toShortString() + " deactivated.");
     }
 
-    public boolean getStatus() {
-        return isActive;
+    public boolean isActive(){
+        return active;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
+
+    abstract public String toShortString();
 }
