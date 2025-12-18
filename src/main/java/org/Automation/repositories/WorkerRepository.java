@@ -1,10 +1,9 @@
 package org.automation.repositories;
+import org.automation.core.DatabaseManager;
+import org.automation.entities.Worker;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import org.automation.database.DatabaseManager;
-import org.automation.entities.Worker;
 
 public class WorkerRepository extends Repository<Worker> {
     public WorkerRepository(DatabaseManager db) {

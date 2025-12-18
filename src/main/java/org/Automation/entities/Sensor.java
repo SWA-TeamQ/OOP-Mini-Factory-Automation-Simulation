@@ -1,6 +1,6 @@
 package org.automation.entities;
 
-public class Sensor {
+public abstract class Sensor {
     public int id;
     public String type;
     public int machineId;

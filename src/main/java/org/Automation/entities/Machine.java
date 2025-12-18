@@ -1,6 +1,6 @@
 package org.automation.entities;
 
-public class Machine {
+public abstract class Machine {
     public int id;
     public String name;
     public String type;

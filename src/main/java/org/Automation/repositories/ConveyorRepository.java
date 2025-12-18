@@ -1,10 +1,10 @@
 package org.automation.repositories;
+import org.automation.core.DatabaseManager;
+import org.automation.entities.ConveyorBelt;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.automation.database.DatabaseManager;
-import org.automation.entities.ConveyorBelt;
 
 public class ConveyorRepository extends Repository<ConveyorBelt> {
     public ConveyorRepository(DatabaseManager db) {

@@ -1,6 +1,6 @@
 package org.automation.repositories;
+import org.automation.core.DatabaseManager;
 import org.automation.entities.Machine;
-import org.automation.database.DatabaseManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

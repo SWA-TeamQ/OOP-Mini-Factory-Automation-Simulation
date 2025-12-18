@@ -1,6 +1,5 @@
-package org.automation.database;
+package org.automation.core;
 
-import java.lang.ref.Cleaner;
 import java.sql.*;
 
 public final class DatabaseManager {

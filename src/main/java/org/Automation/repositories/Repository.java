@@ -1,10 +1,10 @@
 package org.automation.repositories;
-import org.automation.database.DatabaseManager;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.automation.core.DatabaseManager;
 
 public abstract class Repository<T> {
 

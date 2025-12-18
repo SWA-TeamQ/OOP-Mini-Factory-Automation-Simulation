@@ -1,6 +1,5 @@
-package org.automation.utils;
+package org.automation.core;
 
-import org.automation.database.DatabaseManager;
 import org.automation.entities.ProductItem;
 
 class Log {

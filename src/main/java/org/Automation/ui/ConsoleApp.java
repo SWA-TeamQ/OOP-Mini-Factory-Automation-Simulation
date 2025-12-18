@@ -1,7 +1,7 @@
 package org.automation.ui;
 import org.automation.engine.SimulationEngine;
 import org.automation.controllers.WorkflowController;
-import org.automation.utils.Logger;
+import org.automation.core.Logger;
 
 public class ConsoleApp extends ConsoleUI {
 	//Instance Variables

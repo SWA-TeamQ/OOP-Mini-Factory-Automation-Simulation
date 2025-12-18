@@ -1,11 +1,10 @@
 package org.automation.repositories;
-
+import org.automation.core.DatabaseManager;
 import org.automation.entities.ProductItem;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.automation.database.DatabaseManager;
 
 public class ProductItemRepository extends Repository<ProductItem> {
     public ProductItemRepository(DatabaseManager db) {
