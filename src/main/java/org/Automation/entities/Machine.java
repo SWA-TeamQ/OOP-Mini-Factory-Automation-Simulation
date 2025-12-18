@@ -15,6 +15,9 @@ public abstract class Machine extends Actuator {
 
     public abstract void processTick(int time);
 
+    public abstract void start();
+    public abstract void stop();
+
     public boolean isAvailable(){
         return active && status == MachineStatus.IDLE;
     };
