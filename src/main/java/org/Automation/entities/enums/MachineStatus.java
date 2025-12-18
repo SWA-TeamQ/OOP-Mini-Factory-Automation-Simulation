@@ -5,5 +5,5 @@ public enum MachineStatus {
     RUNNING,
     STOPPED,
     ERROR,
-    MAINTAINANCE
+    MAINTENANCE
 }

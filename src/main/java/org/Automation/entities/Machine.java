@@ -13,9 +13,11 @@ public abstract class Machine extends Actuator {
         this.lastMaintenanceDate = lastMaintenanceDate;
     }
 
-    public abstract void onTick(int time);
+    public abstract void processTick(int time);
 
-    public abstract boolean isAvailable();
+    public boolean isAvailable(){
+        return active && status == MachineStatus.IDLE;
+    };
 
     @Override
     public String toString() {
