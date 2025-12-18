@@ -19,7 +19,7 @@ public class SimulationClock {
 	private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();//for the entire system to work on the same time
 	private final int Tick_Per_MS=50;// well we set it into a task per 50 milliseconds, meaning 20 times in a second
 	
-	private ArrayList<ClockObservers> observers = new ArrayList<ClockObservers>();
+private ArrayList<ClockObserver> observers = new ArrayList<ClockObserver>();
 	
 	private SimulationClock(){
 		this.simTime= LocalDateTime.now();
@@ -29,12 +29,12 @@ public class SimulationClock {
 	}
 	
 	//Instance Methods
-	public static synchronized SimulationClock getInstance() { // used to create a single instance for all tasks
-		if(instance != null) {
-			instance= new SimulationClock();
-		}
-		return instance;
-	}
+public static synchronized SimulationClock getInstance() { // used to create a single instance for all tasks
+if (instance == null) {
+    instance = new SimulationClock();
+}
+return instance;
+}
 	
 	private void startIntegralTimer() {
 		scheduler.scheduleAtFixedRate(()->{
@@ -43,33 +43,29 @@ public class SimulationClock {
 		}} , 0, Tick_Per_MS, TimeUnit.MILLISECONDS);
 	}
 	
-	private void tick() {
-		
-		long MillsToAdd = Tick_Per_MS * speedFactor;
-		
-		simTime = simTime.plusNanos(MillsToAdd*1_000_000);
-		
-		long secondsAfterPreviousNotification = ChronoUnit.SECONDS.between(simTime, lastNotificationDate);
-		
-		if(secondsAfterPreviousNotification >=1) {
-			notifyOthers();
-			
-			lastNotificationDate = lastNotificationDate.plusSeconds(secondsAfterPreviousNotification);
-			
-		}
-		
-	}
+private void tick() {
+
+    long millsToAdd = Tick_Per_MS * (long) speedFactor;
+
+    simTime = simTime.plusNanos(millsToAdd * 1_000_000L);
+
+    long secondsAfterPreviousNotification = ChronoUnit.SECONDS.between(lastNotificationDate, simTime);
+
+    if (secondsAfterPreviousNotification >= 1) {
+        notifyOthers();
+        lastNotificationDate = lastNotificationDate.plusSeconds(secondsAfterPreviousNotification);
+    }
+}
 	
-	public synchronized void register(ClockObservers observer) {
-		observers.add(observer);
-	}
+public synchronized void register(ClockObserver observer) {
+    observers.add(observer);
+}
 	
-	private  synchronized void notifyOthers() {
-		for(ClockObservers observer : observers) {
-			observer.onTick(simTime);
-		}
-		
-	}
+private synchronized void notifyOthers() {
+    for (ClockObserver observer : observers) {
+        observer.onTick(simTime);
+    }
+}
 
 	public void start() {
 		ispaused=false;
@@ -88,8 +84,5 @@ public class SimulationClock {
 
 	public LocalDateTime getCurrentTime() {
 		return simTime;
-	}
-	public interface ClockObservers{
-		void onTick(LocalDateTime currentTime);
 	}
 }

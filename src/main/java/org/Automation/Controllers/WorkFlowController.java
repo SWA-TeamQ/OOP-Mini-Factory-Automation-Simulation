@@ -2,7 +2,8 @@ package org.automation.controllers;
 
 import java.time.LocalDateTime;
 import org.automation.engine.SimulationClock;
-import org.automation.services.ActuatorService;
+import org.automation.engine.ClockObserver;
+import org.automation.services.IActuatorService;
 import org.automation.services.IProductionLineService;
 import org.automation.services.IItemTrackingService;
 import org.automation.services.ISensorService;
@@ -11,15 +12,15 @@ import org.automation.services.ISensorService;
  * Orchestrates high-level workflow. Receives simulation clock ticks and delegates
  * time-based decisions to services (ProductionLine, ActuatorService, SensorService).
  */
-public class WorkflowController implements SimulationClock.ClockObservers {
+public class WorkflowController implements ClockObserver {
     private final IProductionLineService productionLine;
     private final ISensorService sensorService;
-    private final ActuatorService actuatorService;
+    private final IActuatorService actuatorService;
     private final IItemTrackingService itemTracker;
 
     public WorkflowController(IProductionLineService productionLine,
                               ISensorService sensorService,
-                              ActuatorService actuatorService,
+                              IActuatorService actuatorService,
                               IItemTrackingService itemTracker) {
         this.productionLine = productionLine;
         this.sensorService = sensorService;

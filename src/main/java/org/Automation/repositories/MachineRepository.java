@@ -5,7 +5,7 @@ import org.automation.entities.Machine;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class MachineRepository extends Repository<Machine>{
+public class MachineRepository<T> extends Repository<Machine>{
     public MachineRepository(DatabaseManager db) {
         super("Machine", db);
     }
@@ -24,8 +24,8 @@ public class MachineRepository extends Repository<Machine>{
     }
 
     @Override
-    protected Machine mapRow(ResultSet rs) throws SQLException {
-        return new Machine(
+    protected T mapRow(ResultSet rs) throws SQLException {
+        return new T(
                 rs.getInt("id"),
                 rs.getString("name"),
                 rs.getString("type"),

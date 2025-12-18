@@ -13,6 +13,10 @@ public abstract class Sensor {
         this.status = status;
     }
 
+    public String getId() {
+        return String.valueOf(id);
+    }
+
     @Override
     public String toString() {
         return "Sensor{id=" + id + ", type=" + type + ", machineId=" + machineId + ", status=" + status + "}";
