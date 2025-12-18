@@ -11,6 +11,9 @@ public abstract class Actuator {
         this.active = false;
     }
 
+    public abstract void start();
+    public abstract void stop();
+
     public void activate() {
         active = true;
         System.out.println(this.toShortString() + " activated.");

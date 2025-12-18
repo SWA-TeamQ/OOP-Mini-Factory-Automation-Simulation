@@ -1,33 +1,36 @@
 package org.automation.entities;
 
-import java.time.LocalDateTime;
+import org.automation.entities.enums.MachineType;
 
 public class PackagingMachine extends Machine {
 
-    public PackagingMachine(String id) {
-        super(id);
+    public PackagingMachine(int id, String name, MachineType machineType) {
+        super(id, name, machineType);
+        this.latency = 3; // 3 ticks
     }
 
     public void activate() {
         super.activate();
-        System.out.println("Packaging machine " + id + " ready.");
+        System.out.println(this.toShortString() + " ready.");
     }
 
     public void deactivate() {
         super.deactivate();
-        System.out.println("Packaging machine " + id + " stopped.");
+        System.out.println(this.toShortString() + " stopped.");
     }
 
-    public void onTick(LocalDateTime currentTime) {
-        if (isActive) {
-            if (lastActionTime == null ||
-                currentTime.minusSeconds(3).isAfter(lastActionTime)) {
+    @Override
+    public void onTick(int secondsPassed) {
+        if (this.isActive()) {
+            // if (lastActionTime == null ||
+            // currentTime.minusSeconds(3).isAfter(lastActionTime)) {
 
-                System.out.println("[" + id + "] Packaging items...");
-                lastActionTime = currentTime;
+            // System.out.println("[" + id + "] Packaging items...");
+            // lastActionTime = currentTime;
 
-                //the next logic will goes here ....
-            }
+            // //the next logic will goes here ....
+            // }
         }
     }
+
 }

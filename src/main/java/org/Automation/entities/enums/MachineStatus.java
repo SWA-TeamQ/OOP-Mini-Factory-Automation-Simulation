@@ -4,6 +4,5 @@ public enum MachineStatus {
     IDLE,
     RUNNING,
     STOPPED,
-    ERROR,
-    MAINTENANCE
+    ERROR
 }

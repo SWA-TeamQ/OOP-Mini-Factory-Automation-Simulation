@@ -1,4 +1,5 @@
 package org.automation.services;
+import org.automation.entities.Actuator;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -6,12 +7,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
-import org.automation.entities.Actuator;
 
-/**
- * Simple in-process actuator registry and runner.
- * Keeps actuators passive; controller schedules actions via activate/deactivate.
- */
 public class ActuatorService implements IActuatorService {
 
     private final CopyOnWriteArrayList<Actuator> actuators = new CopyOnWriteArrayList<>();
@@ -21,7 +17,7 @@ public class ActuatorService implements IActuatorService {
         // Walk actuators and perform per-tick maintenance if needed.
         for (Actuator a : actuators) {
             // Actuator implementation is intentionally simple; place hooks here.
-            if (a.getStatus()) {
+            if (a.isActive()) {
                 // Example heartbeat log
                 System.out.println("[ActuatorService] actuator " + a.getId() + " active at " + time);
             }
@@ -32,7 +28,7 @@ public class ActuatorService implements IActuatorService {
     public void listActuators() {
         System.out.println("Registered actuators:");
             for (Actuator a : actuators) {
-            System.out.println(" - id=" + a.getId() + " active=" + a.getStatus());
+            System.out.println(" - id=" + a.getId() + " active=" + a.isActive());
         }
     }
 
