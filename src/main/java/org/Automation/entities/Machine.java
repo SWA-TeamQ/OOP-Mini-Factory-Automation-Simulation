@@ -7,10 +7,16 @@ public abstract class Machine extends Actuator {
     protected MachineStatus status;
     protected int latency; // based on clock ticks
 
-    public Machine(int id, String name, MachineType machineType) {
-        super(id, name);
+    public Machine(int id, String name, MachineType machineType, double latency) {
+        super(id, name, latency);
         this.machineType = machineType;
         this.status = MachineStatus.IDLE;
+    }
+
+    public Machine(int id, String name, MachineType machineType, double latency, MachineStatus status) {
+        super(id, name, latency);
+        this.machineType = machineType;
+        this.status = status;
     }
 
     public boolean isAvailable() {
@@ -18,6 +24,7 @@ public abstract class Machine extends Actuator {
     }
 
     public void start() {
+        
         if (!this.isAvailable())
             return;
         status = MachineStatus.RUNNING;

@@ -1,18 +1,12 @@
 package org.automation.services;
-
-import java.time.LocalDateTime;
-import java.util.List;
 import org.automation.entities.Actuator;
 
-/**
- * Public actuator service contract used by controllers.
- * Keep minimal surface required by WorkflowController and other callers.
- */
+import java.util.List;
+
 public interface IActuatorService {
-    void onTick(LocalDateTime time);
-    void listActuators();
-    void registerActuator(Actuator actuator);
-    void activate(String id);
-    void deactivate(String id);
+    void onTick(double currentSecond);
+    void register(Actuator actuator);
+    void activate(int id);
+    void deactivate(int id);
     List<Actuator> getActuators();
 }
