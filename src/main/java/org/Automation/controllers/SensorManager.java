@@ -44,7 +44,9 @@ public class SensorManager {
                 }
             }
         } catch (Exception e) {
-            System.err.println("Database init failed: " + e.getMessage());
+            System.err.println("Database init failed:");
+            e.printStackTrace();
+
         }
         this.sensorRepo = repo;
     }
