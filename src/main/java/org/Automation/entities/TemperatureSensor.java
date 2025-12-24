@@ -1,223 +1,276 @@
-package org.Automation.entities;
+package org.automation.entities;
 
-import org.Automation.controllers.SimulationClock;
+import org.automation.engine.SimulationClock;
+import org.automation.engine.ClockObserver;
+
 import java.time.LocalDateTime;
-import java.util.Timer;
-import java.util.TimerTask;
 
-public class TemperatureSensor extends Sensor implements SimulationClock.ClockObserver {
-    
-    // ========== CORE TEMPERATURE FIELDS ==========
+/**
+ * TemperatureSensor
+ * - Implements baseline increment and cooling baseline
+ * - Registers/unregisters with SimulationClock in onStart/onStop hooks
+ * - Uses primaryIncrement and coolingRate set by Sensor.setSimulationInterval(...)
+ * - Uses Sensor's automaticMode and controlEnabled flags; provides a convenience wrapper
+ */
+public class TemperatureSensor extends Sensor implements ClockObserver {
+
     private double currentTemperature;
-    private double minTemperature;
-    private double maxTemperature;
-    private String temperatureUnit;
+    private final String temperatureUnit;
     private double calibrationOffset;
-    private double temperatureIncrement;
-    
-    // ========== CONTROL SYSTEM FIELDS ==========
+    private boolean calibrated = false;
+
     private double targetTemperature;
-    private double temperatureThreshold;
+    private double temperatureTolerance;
     private boolean temperatureControlEnabled;
-    
-    // ========== SIMULATION FIELDS ==========
-    private double startThreshold;
+
+    private final double startThreshold;
     private boolean maxReached;
-    private double coolingRate;
     private LocalDateTime lastActionTime;
 
-    // ========== CONSTRUCTOR ==========
-    public TemperatureSensor(String sensorType, String location, String status, 
-                           double minTemperature, double maxTemperature, String temperatureUnit) {
+    private SimulationClock simulationClock;
+
+    public TemperatureSensor(String sensorType, String location, String status,
+                             double startThreshold, double temperatureTolerance,
+                             double targetTemperature, String temperatureUnit) {
         super(sensorType, location, status);
-        this.minTemperature = minTemperature;
-        this.maxTemperature = maxTemperature;
+        this.startThreshold = startThreshold;
+        this.temperatureTolerance = temperatureTolerance;
+        this.targetTemperature = targetTemperature;
         this.temperatureUnit = temperatureUnit;
-        this.currentTemperature = minTemperature;
-        
-        // Register with global simulation clock
-        SimulationClock.getInstance().register(this);
+        this.currentTemperature = startThreshold;
+        this.maxReached = false;
+        // initialize control target/tolerance in base
+        this.controlTarget = targetTemperature;
+        this.controlTolerance = temperatureTolerance;
     }
 
-    public TemperatureSensor(String sensorType, int location, String status, 
-                           double minTemperature, double maxTemperature) {
-        this(sensorType, String.valueOf(location), status, minTemperature, maxTemperature, "°C");
+    /**
+     * Construct a TemperatureSensor with an explicit sensor id (used when loading from DB).
+     */
+    public TemperatureSensor(int sensorId, String sensorType, String location, String status,
+                             double startThreshold, double temperatureTolerance,
+                             double targetTemperature, String temperatureUnit) {
+        super(sensorId, sensorType, location, status);
+        this.startThreshold = startThreshold;
+        this.temperatureTolerance = temperatureTolerance;
+        this.targetTemperature = targetTemperature;
+        this.temperatureUnit = temperatureUnit;
+        this.currentTemperature = startThreshold;
+        this.maxReached = false;
+        this.controlTarget = targetTemperature;
+        this.controlTolerance = temperatureTolerance;
+    }
+
+    public TemperatureSensor(String sensorType, int location, String status,
+                             double startThreshold, double temperatureTolerance,
+                             double targetTemperature) {
+        this(sensorType, String.valueOf(location), status, startThreshold, temperatureTolerance, targetTemperature, "°C");
+    }
+
+    @Override
+    protected double getBaselineIncrement() { return 0.5; }
+
+    @Override
+    protected double getBaselineCooling() { return 0.25; }
+
+    @Override
+    protected void onStart() {
+        this.simulationClock = SimulationClock.getInstance();
+        this.simulationClock.register(this);
+        // initialize increments based on current clock interval so first cycle is aligned
+        try { setSimulationInterval(this.simulationClock.getTickIntervalMs()); } catch (Exception ignored) {}
+        calibrateSensor();
+        activateSensor();
+        maxReached = false;
+        lastActionTime = null;
+        // sync subclass target with base control fields
+        this.controlTarget = this.targetTemperature;
+        this.controlTolerance = this.temperatureTolerance;
+        enableTemperatureControl(this.targetTemperature, this.temperatureTolerance);
+        updateValue(0);
+        setStatus("Active");
+        System.out.println("🌡️ TemperatureSensor " + getSensorId() + " started at " + currentTemperature + temperatureUnit);
+    }
+
+    @Override
+    protected void onStop() {
+        try { simulationClock.unregister(this); } catch (Exception ignored) {}
+        deactivateSensor();
+        temperatureControlEnabled = false;
+        lastActionTime = null;
+        calibrated = false;
+        updateValue(0);
+        setStatus("Stopped");
+        System.out.println("🛑 TemperatureSensor " + getSensorId() + " stopped at " + currentTemperature + temperatureUnit);
     }
 
     @Override
     public void onTick(LocalDateTime currentTime) {
-        if (lastActionTime == null || currentTime.minusSeconds(5).isAfter(lastActionTime)) {
-            if (isActive() && !maxReached) {
-                performTemperatureCycle();
+        synchronized (this) {
+            if (!isActive()) return;
+            if (!automaticMode) return; // gate automatic behavior
+            if (lastActionTime == null || currentTime.minusSeconds(5).isAfter(lastActionTime)) {
+                try {
+                    int intervalMs = SimulationClock.getInstance().getTickIntervalMs();
+                    setSimulationInterval(intervalMs);
+                    if (controlEnabled && temperatureControlEnabled) {
+                        performCycle();
+                    } else {
+                        // passive behavior: small drift or no-op; here we apply primaryIncrement as passive growth
+                        updateValue(primaryIncrement);
+                    }
+                } catch (Exception e) {
+                    sendAlert(currentTemperature + calibrationOffset);
+                    setStatus("Error");
+                }
+                lastActionTime = currentTime;
             }
-            lastActionTime = currentTime;
         }
     }
 
-    // ========== GETTERS ==========
-    public double getCurrentTemperature() { return currentTemperature; }
-    public String getTemperatureUnit() { return temperatureUnit; }
-    public double getTargetTemperature() { return targetTemperature; }
-    public boolean isTemperatureControlEnabled() { return temperatureControlEnabled; }
+    // -----------------------
+    // Abstract implementations
+    // -----------------------
+    @Override
+    public Object getValue() { return currentTemperature; }
 
-    public String getSensorInfo() {
-        return String.format("TemperatureSensor[ID=%d, Type=%s, Location=%s, Status=%s, " +
-                           "Current=%.2f%s, Range=%.1f-%.1f%s, Target=%.1f%s, Control=%s]",
-                           getSensorId(), getSensorType(), getLocation(), getStatus(),
-                           currentTemperature, temperatureUnit,
-                           minTemperature, maxTemperature, temperatureUnit,
-                           targetTemperature, temperatureUnit,
-                           temperatureControlEnabled ? "Enabled" : "Disabled");
-    }
-
-    // ========== ABSTRACT METHOD IMPLEMENTATIONS ==========
     @Override
     public void readValue() {
-        readSensorData();
+        calibrateSensor();
+        double calibratedTemp = currentTemperature + calibrationOffset;
+        System.out.println(getSensorInfo() + " | Calibrated Temperature: " + String.format("%.2f%s", calibratedTemp, temperatureUnit));
+        boolean valid = validateReading(calibratedTemp);
+        if (!valid) sendAlert(calibratedTemp);
+        updateStatusAfterRead(valid);
+        System.out.println("⚡ Status: " + getTemperatureStatus(calibratedTemp));
     }
 
     @Override
-    public void updateValue() {
-        simulateTemperature();
-    }
-
-    @Override
-    public Object getValue() {
-        return currentTemperature;
+    public void updateValue(double change) {
+        simulateTemperature(change);
+        readValue();
     }
 
     @Override
     public void calibrateSensor() {
-        System.out.println("🔧 Calibrating temperature sensor " + getSensorId());
-        this.calibrationOffset = 0.5;
+        if (!calibrated) {
+            setStatus("Calibrating");
+            System.out.println("🔧 Calibrating temperature sensor " + getSensorId());
+            this.calibrationOffset = 0.05 + Math.random() * 0.1;
+            calibrated = true;
+            setStatus("OK");
+        }
     }
 
     @Override
     public boolean validateReading() {
-        return currentTemperature >= minTemperature && currentTemperature <= maxTemperature;
+        return validateReading(currentTemperature + calibrationOffset);
+    }
+
+    public boolean validateReading(double calibratedTemp) {
+        return Math.abs(calibratedTemp - targetTemperature) <= temperatureTolerance;
     }
 
     @Override
-    public void sendAlert() {
-        System.out.println("🚨 TEMPERATURE ALERT - Sensor " + getSensorId() + 
-                         ": " + currentTemperature + temperatureUnit);
-        updateStatus("Alert");
+    public void sendAlert(double currentTemp) {
+        double calibratedTemp = currentTemp + calibrationOffset;
+        raiseAlert("Temperature out of range", temperatureUnit + " (Calibrated: " + String.format("%.2f", calibratedTemp) + ")");
     }
 
-    // ========== CORE TEMPERATURE METHODS ==========
-    public void readSensorData() {
-        double temp = simulateTemperature();
-        this.currentTemperature = temp + calibrationOffset;
-        setCurrentValue(currentTemperature);
-        
-        System.out.println(getSensorInfo());
-        
-        if (!validateReading()) {
-            sendAlert();
-        }
+    @Override
+    public String getSensorInfo() {
+        return String.format(
+                "TemperatureSensor[ID=%d, Type=%s, Location=%s, Status=%s, Current=%.2f%s, Start=%.2f%s, Target=%.2f%s, Tolerance=%.2f%s, Control=%s, Auto=%s]",
+                getSensorId(), getSensorType(), getLocation(), getStatus(),
+                currentTemperature, temperatureUnit,
+                startThreshold, temperatureUnit,
+                targetTemperature, temperatureUnit,
+                temperatureTolerance, temperatureUnit,
+                temperatureControlEnabled ? "Enabled" : "Disabled",
+                automaticMode ? "On" : "Off"
+        );
     }
 
-    public double simulateTemperature() {
-        this.currentTemperature += temperatureIncrement;
-        
-        if (currentTemperature > maxTemperature) {
-            currentTemperature = maxTemperature;
-        } else if (currentTemperature < minTemperature) {
-            currentTemperature = minTemperature;
-        }
-        
-        this.currentTemperature = Math.round(currentTemperature);
+    // -----------------------
+    // Simulation logic
+    // -----------------------
+    public double simulateTemperature(double change) {
+        currentTemperature += change;
+        if (currentTemperature > targetTemperature) currentTemperature = targetTemperature;
+        if (currentTemperature < startThreshold) currentTemperature = startThreshold;
         setCurrentValue(currentTemperature);
         return currentTemperature;
     }
 
-    // ========== CONTROL SYSTEM METHODS ==========
-    public void enableTemperatureControl(double targetTemp, double threshold) {
+    public void enableTemperatureControl(double targetTemp, double tolerance) {
         this.targetTemperature = targetTemp;
-        this.temperatureThreshold = threshold;
+        this.temperatureTolerance = tolerance;
         this.temperatureControlEnabled = true;
+        // sync base control fields
+        enableControl(targetTemp, tolerance);
     }
 
-    public String getTemperatureStatus() {
-        if (!temperatureControlEnabled) {
-            return "Control Disabled";
+    public void disableTemperatureControl() {
+        this.temperatureControlEnabled = false;
+        disableControl();
+    }
+
+    public String getTemperatureStatus(double tempToCheck) {
+        if (!temperatureControlEnabled) return "Control Disabled";
+        double difference = Math.abs(tempToCheck - targetTemperature);
+        if (difference <= temperatureTolerance) return "Within Target Range";
+        else if (tempToCheck > targetTemperature + temperatureTolerance) return "Too Hot";
+        else return "Too Cold";
+    }
+
+    // -----------------------
+    // Heating / Cooling cycle (uses primaryIncrement and coolingRate)
+    // -----------------------
+    private void startHeating() {
+        updateValue(primaryIncrement);
+        if (currentTemperature >= targetTemperature + temperatureTolerance) {
+            throw new IllegalStateException("Too Hot: " + currentTemperature + temperatureUnit);
         }
-        
-        double difference = Math.abs(currentTemperature - targetTemperature);
-        
-        if (difference <= temperatureThreshold) {
-            return "Within Target Range";
-        } else if (currentTemperature > targetTemperature + temperatureThreshold) {
-            return "Too Hot";
+        if (currentTemperature >= targetTemperature) {
+            maxReached = true;
+            deactivateSensor();
+            setStatus("Cooling");
+        }
+    }
+
+    private void startCooling() {
+        updateValue(-coolingRate);
+        if (currentTemperature <= startThreshold - temperatureTolerance) {
+            throw new IllegalStateException("Too Cold: " + currentTemperature + temperatureUnit);
+        }
+        if (currentTemperature <= startThreshold) {
+            maxReached = false;
+            activateSensor();
+            setStatus("Active");
+            System.out.println("🔄 Sensor " + getSensorId() + " cooled to start threshold - RESTARTING");
+        }
+    }
+
+    @Override
+    public void performCycle() {
+        if (!temperatureControlEnabled) return;
+        // hysteresis: only heat if below target - tolerance, only cool if above target + tolerance
+        double calibrated = currentTemperature + calibrationOffset;
+        if (calibrated < targetTemperature - temperatureTolerance) {
+            startHeating();
+        } else if (calibrated > targetTemperature + temperatureTolerance) {
+            startCooling();
         } else {
-            return "Too Cold";
+            // within deadband: no action
+            setStatus("WithinDeadband");
         }
     }
 
-    // ========== SIMULATION CONTROL ==========
-    public void start() {
-        this.currentTemperature = startThreshold;
-        setCurrentValue(currentTemperature);
-        maxReached = false;
-        activateSensor();
-        System.out.println("🌡️ Starting temperature sensor " + getSensorId() + " simulation");
-        System.out.println("Initial temperature: " + getCurrentTemperature() + temperatureUnit);
-    }
-
-    public void stop() {
-        deactivateSensor();
-    }
-    
-    public boolean isRunning() {
-        return isActive();
-    }
-
-    public void configureHeatingParameters(double startThreshold, double increment, double coolingRate) {
-        this.startThreshold = startThreshold;
-        this.coolingRate = coolingRate;
-        this.temperatureIncrement = increment;
-    }
-
-    // ========== PRIVATE SIMULATION HELPERS ==========
-    private void performTemperatureCycle() {
-        if (isActive() && !maxReached) {
-            this.currentTemperature += temperatureIncrement;
-            setCurrentValue(currentTemperature);
-            System.out.println("🌡️ Sensor " + getSensorId() + " heating: " + getCurrentTemperature() + temperatureUnit);
-            
-            if (currentTemperature >= maxTemperature) {
-                this.currentTemperature = maxTemperature;
-                setCurrentValue(currentTemperature);
-                maxReached = true;
-                deactivateSensor();
-                System.out.println("🌡️ Sensor " + getSensorId() + " reached max: " + maxTemperature + "°C - DEACTIVATED");
-                System.out.println(getSensorInfo());
-                startCoolingMonitor();
-            }
-        }
-    }
-    
-    private void startCoolingMonitor() {
-        Timer coolingTimer = new Timer("Cooling-" + getSensorId(), true);
-        coolingTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                double cooledTemp = currentTemperature - coolingRate;
-                currentTemperature = Math.max(cooledTemp, startThreshold);
-                setCurrentValue(currentTemperature);
-                
-                System.out.println("❄️ Sensor " + getSensorId() + " cooling: " + getCurrentTemperature() + temperatureUnit);
-                
-                if (currentTemperature <= startThreshold + 5.0) {
-                    coolingTimer.cancel();
-                    System.out.println("🔄 Sensor " + getSensorId() + " temperature dropped - RESTARTING");
-                    maxReached = false;
-                    activateSensor();
-                    start();
-    }
-            }
-        }, 2000, 2000);
-    }
+    // getters
+    public double getCurrentTemperature() { return currentTemperature; }
+    public String getTemperatureUnit() { return temperatureUnit; }
+    public double getTargetTemperature() { return targetTemperature; }
+    public boolean isTemperatureControlEnabled() { return temperatureControlEnabled; }
+    public double getStartThreshold() { return startThreshold; }
+    public double getTemperatureTolerance() { return temperatureTolerance; }
 }
-
-

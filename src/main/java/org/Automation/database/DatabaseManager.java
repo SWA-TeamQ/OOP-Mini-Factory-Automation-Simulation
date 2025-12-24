@@ -9,8 +9,7 @@ public final class DatabaseManager {
   private final String url = "jdbc:sqlite:automation.sqlite";
 
   public boolean connect() {
-    if (connection != null)
-      return true;
+    if (connection != null) return true;
 
     try {
       connection = DriverManager.getConnection(url);
@@ -55,6 +54,43 @@ public final class DatabaseManager {
       return pstmt.executeQuery();
     } catch (SQLException e) {
       throw new RuntimeException("Query execution failed: " + e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Safe query helper that maps rows using the provided RowMapper and
+   * ensures PreparedStatement and ResultSet are closed properly.
+   */
+  public <T> java.util.List<T> query(String tableName, String where, Object[] params, org.automation.database.RowMapper<T> mapper) {
+    String sql = "SELECT * FROM " + tableName + (where != null && !where.trim().isEmpty() ? " WHERE " + where : "");
+    java.util.List<T> result = new java.util.ArrayList<>();
+    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+      bindParams(pstmt, params);
+      try (ResultSet rs = pstmt.executeQuery()) {
+        while (rs.next()) {
+          result.add(mapper.mapRow(rs));
+        }
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException("Query execution failed: " + e.getMessage(), e);
+    }
+    return result;
+  }
+
+  public <T> T queryOne(String tableName, String where, Object[] params, org.automation.database.RowMapper<T> mapper) {
+    java.util.List<T> list = query(tableName, where, params, mapper);
+    return list.isEmpty() ? null : list.get(0);
+  }
+
+  /**
+   * Execute DDL statements such as CREATE TABLE.
+   */
+  public boolean executeDDL(String sql) {
+    try (Statement stmt = connection.createStatement()) {
+      stmt.execute(sql);
+      return true;
+    } catch (SQLException e) {
+      throw new RuntimeException("DDL execution failed: " + e.getMessage(), e);
     }
   }
 

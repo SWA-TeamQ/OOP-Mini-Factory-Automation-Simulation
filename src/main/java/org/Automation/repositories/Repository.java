@@ -30,38 +30,27 @@ public abstract class Repository<T> {
     }
 
     public T findOne(String where, Object[] params) {
-        try (ResultSet rs = db.find(tableName, where, params)) {
-            if (rs.next()) {
-                return mapRow(rs);
-            }
-        } catch (SQLException e) {
+        try {
+            return db.queryOne(tableName, where, params, rs -> mapRow(rs));
+        } catch (RuntimeException e) {
             throw new RuntimeException("findOne failed: " + e.getMessage(), e);
         }
-        return null;
     }
 
     public List<T> findAllWhere(String where, Object[] params) {
-        List<T> result = new ArrayList<>();
-        try (ResultSet rs = db.find(tableName, where, params)) {
-            while (rs.next()) {
-                result.add(mapRow(rs));
-            }
-        } catch (SQLException e) {
+        try {
+            return db.query(tableName, where, params, rs -> mapRow(rs));
+        } catch (RuntimeException e) {
             throw new RuntimeException("findAllWhere failed: " + e.getMessage(), e);
         }
-        return result;
     }
 
     public List<T> findAll() {
-        List<T> result = new ArrayList<>();
-        try (ResultSet rs = db.find(tableName, null, null)) {
-            while (rs.next()) {
-                result.add(mapRow(rs));
-            }
-        } catch (SQLException e) {
+        try {
+            return db.query(tableName, null, null, rs -> mapRow(rs));
+        } catch (RuntimeException e) {
             throw new RuntimeException("findAll failed: " + e.getMessage(), e);
         }
-        return result;
     }
 
     // ---------- Maps a row from ResultSet into an entity ----------
