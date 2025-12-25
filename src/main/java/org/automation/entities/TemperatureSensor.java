@@ -24,7 +24,6 @@ public class TemperatureSensor extends Sensor implements ClockObserver {
     private boolean temperatureControlEnabled;
 
     private final double startThreshold;
-    private boolean maxReached;
     private LocalDateTime lastActionTime;
 
     private SimulationClock simulationClock;
@@ -38,7 +37,6 @@ public class TemperatureSensor extends Sensor implements ClockObserver {
         this.targetTemperature = targetTemperature;
         this.temperatureUnit = temperatureUnit;
         this.currentTemperature = startThreshold;
-        this.maxReached = false;
         // initialize control target/tolerance in base
         this.controlTarget = targetTemperature;
         this.controlTolerance = temperatureTolerance;
@@ -56,7 +54,6 @@ public class TemperatureSensor extends Sensor implements ClockObserver {
         this.targetTemperature = targetTemperature;
         this.temperatureUnit = temperatureUnit;
         this.currentTemperature = startThreshold;
-        this.maxReached = false;
         this.controlTarget = targetTemperature;
         this.controlTolerance = temperatureTolerance;
     }
@@ -81,7 +78,6 @@ public class TemperatureSensor extends Sensor implements ClockObserver {
         try { setSimulationInterval(this.simulationClock.getTickIntervalMs()); } catch (Exception ignored) {}
         calibrateSensor();
         activateSensor();
-        maxReached = false;
         lastActionTime = null;
         // sync subclass target with base control fields
         this.controlTarget = this.targetTemperature;
@@ -99,7 +95,7 @@ public class TemperatureSensor extends Sensor implements ClockObserver {
         temperatureControlEnabled = false;
         lastActionTime = null;
         calibrated = false;
-        updateValue(0);
+       updateValue(0);
         setStatus("Stopped");
         System.out.println("🛑 TemperatureSensor " + getSensorId() + " stopped at " + currentTemperature + temperatureUnit);
     }
@@ -109,7 +105,7 @@ public class TemperatureSensor extends Sensor implements ClockObserver {
         synchronized (this) {
             if (!isActive()) return;
             if (!automaticMode) return; // gate automatic behavior
-            if (lastActionTime == null || currentTime.minusSeconds(5).isAfter(lastActionTime)) {
+            if (lastActionTime == null || currentTime.minusSeconds(1).isAfter(lastActionTime)) {
                 try {
                     int intervalMs = SimulationClock.getInstance().getTickIntervalMs();
                     setSimulationInterval(intervalMs);
@@ -143,6 +139,8 @@ public class TemperatureSensor extends Sensor implements ClockObserver {
         if (!valid) sendAlert(calibratedTemp);
         updateStatusAfterRead(valid);
         System.out.println("⚡ Status: " + getTemperatureStatus(calibratedTemp));
+        System.out.println("Current: " + currentTemperature + ", Calibrated: " + (currentTemperature + calibrationOffset) + ", Target: " + targetTemperature + ", Tolerance: " + temperatureTolerance);
+
     }
 
     @Override
@@ -158,7 +156,7 @@ public class TemperatureSensor extends Sensor implements ClockObserver {
             System.out.println("🔧 Calibrating temperature sensor " + getSensorId());
             this.calibrationOffset = 0.05 + Math.random() * 0.1;
             calibrated = true;
-            setStatus("OK");
+            setStatus("Calibrated");
         }
     }
 
@@ -215,56 +213,70 @@ public class TemperatureSensor extends Sensor implements ClockObserver {
         disableControl();
     }
 
-    public String getTemperatureStatus(double tempToCheck) {
-        if (!temperatureControlEnabled) return "Control Disabled";
-        double difference = Math.abs(tempToCheck - targetTemperature);
-        if (difference <= temperatureTolerance) return "Within Target Range";
-        else if (tempToCheck > targetTemperature + temperatureTolerance) return "Too Hot";
-        else return "Too Cold";
+  public String getTemperatureStatus(double tempToCheck) {
+    if (!temperatureControlEnabled) return "Control Disabled";
+
+    // Too cold only if below the minimum allowed by start threshold and tolerance
+    if (tempToCheck < startThreshold - temperatureTolerance) {
+        return "Too Cold";
     }
+
+    // Too hot only if above the maximum allowed by target temperature and tolerance
+    if (tempToCheck > targetTemperature + temperatureTolerance) {
+        return "Too Hot";
+    }
+
+    // Otherwise, within range
+    return "Within Target Range";
+}
 
     // -----------------------
     // Heating / Cooling cycle (uses primaryIncrement and coolingRate)
     // -----------------------
-    private void startHeating() {
-        updateValue(primaryIncrement);
-        if (currentTemperature >= targetTemperature + temperatureTolerance) {
-            throw new IllegalStateException("Too Hot: " + currentTemperature + temperatureUnit);
-        }
-        if (currentTemperature >= targetTemperature) {
-            maxReached = true;
-            deactivateSensor();
-            setStatus("Cooling");
-        }
+private void startHeating() {
+    updateValue(primaryIncrement);
+    if (currentTemperature >= targetTemperature) {
+        currentTemperature = targetTemperature;
+        setStatus("WithinTarget");
+    } else {
+        setStatus("Heating");
+    }
+}
+
+private void startCooling() {
+    updateValue(-coolingRate);
+    if (currentTemperature <= startThreshold) {
+        currentTemperature = startThreshold;
+        setStatus("WithinTarget");
+    } else {
+        setStatus("Cooling");
+    }
+}
+
+
+@Override
+public void performCycle() {
+    if (!temperatureControlEnabled) return;
+
+    double calibrated = currentTemperature + calibrationOffset;
+
+    double lowerLimit = targetTemperature - temperatureTolerance; // heat below this
+    double upperLimit = targetTemperature + temperatureTolerance; // cool above this
+
+    if (calibrated < lowerLimit) {
+        startHeating();
+    } else if (calibrated > upperLimit) {
+        startCooling();
+    } else {
+        setStatus("WithinDeadband"); // do nothing
     }
 
-    private void startCooling() {
-        updateValue(-coolingRate);
-        if (currentTemperature <= startThreshold - temperatureTolerance) {
-            throw new IllegalStateException("Too Cold: " + currentTemperature + temperatureUnit);
-        }
-        if (currentTemperature <= startThreshold) {
-            maxReached = false;
-            activateSensor();
-            setStatus("Active");
-            System.out.println("🔄 Sensor " + getSensorId() + " cooled to start threshold - RESTARTING");
-        }
+    // Safety alerts
+    if (calibrated < startThreshold - temperatureTolerance || calibrated > targetTemperature + temperatureTolerance) {
+        sendAlert(currentTemperature);
     }
+}
 
-    @Override
-    public void performCycle() {
-        if (!temperatureControlEnabled) return;
-        // hysteresis: only heat if below target - tolerance, only cool if above target + tolerance
-        double calibrated = currentTemperature + calibrationOffset;
-        if (calibrated < targetTemperature - temperatureTolerance) {
-            startHeating();
-        } else if (calibrated > targetTemperature + temperatureTolerance) {
-            startCooling();
-        } else {
-            // within deadband: no action
-            setStatus("WithinDeadband");
-        }
-    }
 
     // getters
     public double getCurrentTemperature() { return currentTemperature; }
