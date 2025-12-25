@@ -17,7 +17,7 @@ public class ConsoleApp extends ConsoleUI {
   public ConsoleApp(DatabaseManager db) {
     this.logger = new Logger(db);
 
-    StationRepository stationRepo = new StationRepository();
+    StationRepository stationRepo = new StationRepository(db);
     MachineRepository machineRepo = new MachineRepository(db);
     SensorRepository sensorRepo = new SensorRepository(db);
     ProductItemRepository itemRepo = new ProductItemRepository(db);

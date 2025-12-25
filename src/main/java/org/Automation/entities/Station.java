@@ -18,4 +18,5 @@ public abstract class Station {
     public String getStationId() { return stationId; }
     public String getName() { return name; }
     public StationStatus getStatus() { return status; }
+    public void setStatus(StationStatus status){ this.status=status;}
 }
