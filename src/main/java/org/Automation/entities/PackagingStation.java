@@ -1,5 +1,5 @@
-package org.automation.entities;
+package org.Automation.entities;
 
-public class PackagingStation extends Station{
-    
+public class PackagingStation extends Station {
+
 }

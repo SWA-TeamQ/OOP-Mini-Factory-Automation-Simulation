@@ -1,4 +1,4 @@
-package org.automation.core;
+package org.Automation.core;
 
 import java.util.List;
 import java.util.HashMap;
@@ -17,44 +17,46 @@ import java.util.function.Consumer;
  */
 
 public class EventBus {
-    private static final EventBus INSTANCE = new EventBus();
+  private static final EventBus INSTANCE = new EventBus();
 
-    private final Map<Class<?>, List<Consumer<Object>>> listeners = new HashMap<>();
+  private final Map<Class<?>, List<Consumer<Object>>> listeners = new HashMap<>();
 
-    private EventBus() {}
+  private EventBus() {
+  }
 
-    public static EventBus getInstance() {
-        return INSTANCE;
+  public static EventBus getInstance() {
+    return INSTANCE;
+  }
+
+  public <T> void register(Class<T> eventType, Consumer<T> listener) {
+    listeners.computeIfAbsent(eventType, k -> new CopyOnWriteArrayList<>())
+        .add((Consumer<Object>) listener);
+  }
+
+  public <T> void unregister(Class<T> eventType, Consumer<T> listener) {
+    List<Consumer<Object>> list = listeners.get(eventType);
+    if (list != null) {
+      list.remove(listener);
     }
+  }
 
-    public <T> void register(Class<T> eventType, Consumer<T> listener) {
-        listeners.computeIfAbsent(eventType, k -> new CopyOnWriteArrayList<>())
-                 .add((Consumer<Object>) listener);
-    }
+  public void publish(Object event) {
+    if (event == null)
+      return;
+    Class<?> emitted = event.getClass();
 
-    public <T> void unregister(Class<T> eventType, Consumer<T> listener) {
-        List<Consumer<Object>> list = listeners.get(eventType);
-        if (list != null) {
-            list.remove(listener);
+    // Deliver to listeners registered for super types as well
+    listeners.forEach((type, consumers) -> {
+      if (type.isAssignableFrom(emitted)) {
+        for (Consumer<Object> c : consumers) {
+          try {
+            c.accept(event);
+          } catch (Exception e) {
+            System.err.println("[EventBus] listener error: " + e.getMessage());
+            e.printStackTrace();
+          }
         }
-    }
-
-    public void publish(Object event) {
-        if (event == null) return;
-        Class<?> emitted = event.getClass();
-
-        // Deliver to listeners registered for super types as well
-        listeners.forEach((type, consumers) -> {
-            if (type.isAssignableFrom(emitted)) {
-                for (Consumer<Object> c : consumers) {
-                    try {
-                        c.accept(event);
-                    } catch (Exception e) {
-                        System.err.println("[EventBus] listener error: " + e.getMessage());
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-    }
+      }
+    });
+  }
 }

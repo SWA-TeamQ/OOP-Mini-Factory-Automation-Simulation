@@ -1,4 +1,4 @@
-package org.automation.core;
+package org.Automation.core;
 
 import java.sql.*;
 
@@ -118,7 +118,11 @@ public final class DatabaseManager {
     return executeMutator(sql, params);
   }
 
-  void Cleaner(){
+  public void closeConnection() {
+    disconnect();
+  }
+
+  void Cleaner() {
     disconnect();
   }
 }

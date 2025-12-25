@@ -1,10 +1,13 @@
-package org.automation.services;
+package org.Automation.services;
 
 import java.time.LocalDateTime;
 
 public interface IItemTrackingService {
-    void onTick(LocalDateTime time);
-    void start();
-    void stop();
-    String getStatus();
+  void onTick(LocalDateTime time);
+
+  void start();
+
+  void stop();
+
+  String getStatus();
 }

@@ -1,7 +1,7 @@
-package org.automation.ui.helpers;
+package org.Automation.ui.helpers;
 
 class FactorySnapshotView {
-    public void display() {
+  public void display() {
 
-    }
+  }
 }

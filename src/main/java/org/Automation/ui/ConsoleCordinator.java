@@ -1,24 +1,24 @@
-package org.automation.ui;
+package org.Automation.ui;
 
-import org.automation.entities.Actuator;
-import org.automation.services.ActuatorService;
+import org.Automation.entities.Actuator;
+import org.Automation.services.ActuatorService;
 
-import org.automation.ui.helpers.*;
+import org.Automation.ui.helpers.*;
 
 public class ConsoleCordinator {
-    private final ActuatorService actuatorService;
+  private final ActuatorService actuatorService;
 
-    public ConsoleCordinator(ActuatorService actuatorService) {
-        this.actuatorService = actuatorService;
+  public ConsoleCordinator(ActuatorService actuatorService) {
+    this.actuatorService = actuatorService;
+  }
+
+  public void showActuators() {
+    TableView table = new TableView();
+    table.setHeader("ID", "Name", "Active");
+    for (Actuator a : actuatorService.getActuators()) {
+      table.addRow(a.getId(), a.getName(), a.isActive());
     }
 
-    public void showActuators() {
-        TableView table = new TableView();
-        table.setHeader("ID", "Name", "Active");
-        for (Actuator a : actuatorService.getActuators()) {
-            table.addRow(a.getId(), a.getName(), a.isActive());
-        }
-
-        table.display();
-    }
+    table.display();
+  }
 }

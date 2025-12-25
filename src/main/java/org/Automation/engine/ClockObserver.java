@@ -1,8 +1,11 @@
-package org.automation.engine;
+package org.Automation.engine;
+
+import java.time.LocalDateTime;
 
 /**
- * Single shared clock observer interface used by SimulationClock and services/controllers.
+ * Single shared clock observer interface used by SimulationClock and
+ * services/controllers.
  */
 public interface ClockObserver {
-    void onTick(double currentSecond);
+  void onTick(LocalDateTime currentSecond);
 }

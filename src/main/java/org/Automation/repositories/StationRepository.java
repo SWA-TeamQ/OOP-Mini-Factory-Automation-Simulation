@@ -1,5 +1,5 @@
-package org.automation.repositories;
+package org.Automation.repositories;
 
 public class StationRepository {
-    
+
 }

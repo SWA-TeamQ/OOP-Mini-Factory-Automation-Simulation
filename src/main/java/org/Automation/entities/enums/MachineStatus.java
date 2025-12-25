@@ -1,8 +1,8 @@
-package org.automation.entities.enums;
+package org.Automation.entities.enums;
 
 public enum MachineStatus {
-    IDLE,
-    RUNNING,
-    STOPPED,
-    ERROR
+  IDLE,
+  RUNNING,
+  STOPPED,
+  ERROR
 }
