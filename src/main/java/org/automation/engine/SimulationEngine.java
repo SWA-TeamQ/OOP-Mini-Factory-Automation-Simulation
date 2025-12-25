@@ -1,19 +1,15 @@
 package org.automation.engine;
-// import java.time.LocalDateTime;
-
-import org.automation.utils.Logger;
+import java.time.LocalDateTime;
+// import org.automation.controllers.WorkflowController;
+// import org.automation.utils.Logger;
 
 public class SimulationEngine {
 	//Instance Variables
 	
 	// WorkflowController controller;
-	Logger logger;
+	// Logger logger;
 	
-	//Instance Methods
-	public void runStep() {
-		
 	}
-	
 	public void startSimulation() {
 		SimulationClock clock =  SimulationClock.getInstance();
 		clock.setSpeedFactor(1);
