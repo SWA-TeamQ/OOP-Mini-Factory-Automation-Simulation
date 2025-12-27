@@ -164,7 +164,7 @@ public class TemperatureSensor extends Sensor implements SimulationClock.ClockOb
         deactivateSensor();
     }
     
-    public boolean isRunning() { 
+    public boolean isRunning() {
         return isActive();
     }
 
