@@ -23,7 +23,7 @@ public class ConsoleApp extends ConsoleUI {
     ProductItemRepository itemRepo = new ProductItemRepository(db);
 
     IProductionLineService lineService = new ProductionLineService();
-    IItemTrackingService trackingService = new ItemTrackingService();
+    IItemTrackingService trackingService = new ItemTrackingService(db, itemRepo);
     ISensorService sensorService = new SensorService();
     IActuatorService actuatorService = new ActuatorService();
 
@@ -33,7 +33,6 @@ public class ConsoleApp extends ConsoleUI {
 
   // Instance Methods
   public void start() {
-    simulationEngine.startSimulation();
     printWelcomeMessage();
     runMainMenu();
   }
@@ -54,10 +53,12 @@ public class ConsoleApp extends ConsoleUI {
   public void handleUserInput(String input) {
     switch (input) {
       case "1":
+        controller.startProduction();
         simulationEngine.startSimulation();
         System.out.println("\n[SYSTEM]: Simulation is now RUNNING.");
         break;
       case "2":
+        controller.stopProduction();
         simulationEngine.stopSimulation();
         System.out.println("\n[SYSTEM]: Simulation has been PAUSED.");
         break;
@@ -78,8 +79,8 @@ public class ConsoleApp extends ConsoleUI {
   public void printWelcomeMessage() {
     printHeader("AUTOMATION SIMULATION v1.0");
     System.out.println("System initialized successfully.");
-    System.out.println("Connected to Database: factory_sim.db");
-    System.out.println("Logger active: simulation.log");
+    System.out.println("Connected to Database: automation.sqlite");
+    System.out.println("Logger active: (console)");
     System.out.println("---------------------------------------");
   }
 

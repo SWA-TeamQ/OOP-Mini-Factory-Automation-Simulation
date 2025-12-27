@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import org.Automation.engine.SimulationClock;
 import org.Automation.engine.ClockObserver;
 import org.Automation.services.IActuatorService;
-import org.Automation.services.IProductionLineService;
+import org.Automation.services.IProductionvLineService;
 import org.Automation.services.IItemTrackingService;
 import org.Automation.services.ISensorService;
 
@@ -46,17 +46,21 @@ public class WorkFlowController implements ClockObserver {
     // 3) Let actuator service process scheduled actuator actions
     actuatorService.onTick(currentTime);
 
-    // 4) Optional: perform tracking/logging
-    // itemTracker.snapshot() or similar if implemented
+    // 4) Track/log item movement or snapshots
+    itemTracker.onTick(currentTime);
   }
 
   public void startProduction() {
     // orchestration start logic
+    sensorService.start();
     productionLine.start();
+    itemTracker.start();
   }
 
   public void stopProduction() {
+    sensorService.stop();
     productionLine.stop();
+    itemTracker.stop();
   }
 
   public void handleItemFlow() {

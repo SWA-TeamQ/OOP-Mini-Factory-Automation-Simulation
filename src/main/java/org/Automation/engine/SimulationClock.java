@@ -40,7 +40,7 @@ public class SimulationClock {
       return;
 
     // NOTE: Line changed here
-    currentSecond.plusSeconds((Tick_Per_MS * speedFactor) / 1000);
+    currentSecond = currentSecond.plusSeconds((Tick_Per_MS * speedFactor) / 1000);
 
     for (ClockObserver observer : observers)
       observer.onTick(currentSecond);
