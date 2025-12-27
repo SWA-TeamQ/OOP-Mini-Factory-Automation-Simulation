@@ -114,7 +114,7 @@ public class TemperatureSensor extends Sensor implements SimulationClock.ClockOb
     }
 
     public double simulateTemperature() {
-       // this.currentTemperature += temperatureIncrement;
+       this.currentTemperature += temperatureIncrement;
         
         if (currentTemperature > maxTemperature) {
             currentTemperature = maxTemperature;
