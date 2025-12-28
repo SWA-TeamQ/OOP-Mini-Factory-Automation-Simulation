@@ -18,6 +18,7 @@ public class ProductionLineService implements IProductionLineService {
 
     public ProductionLineService(
             StationRepository stationRepo,
+            ProductItemRepository productRepo,
             ConveyorRepository conveyorRepo,
             ItemTrackingService itemTrackingService,
             SensorService sensorService,
@@ -25,6 +26,7 @@ public class ProductionLineService implements IProductionLineService {
             EventBus eventBus
     ) {
         this.stationRepo = stationRepo;
+        this.productRepo = productRepo;
         this.conveyorRepo = conveyorRepo;
         this.itemTrackingService = itemTrackingService;
         this.sensorService = sensorService;

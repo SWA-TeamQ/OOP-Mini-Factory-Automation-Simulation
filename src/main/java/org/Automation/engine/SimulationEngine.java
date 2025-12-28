@@ -18,7 +18,6 @@ public class SimulationEngine {
     public SimulationEngine(SimulationClock clock,ProductionLineService productionLineService) {
         this.productionLineService = productionLineService;
         this.clock=clock;
-        this.clock = new SimulationClock();
     }
     public SimulationEngine(ProductionLineService productionLineService) {
         this.productionLineService = productionLineService;

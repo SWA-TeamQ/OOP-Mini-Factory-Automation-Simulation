@@ -26,6 +26,7 @@ public class Main {
         // ==============================
         // 1️⃣ SYSTEM BOOTSTRAP
         // ==============================
+        Logger.clearLog();
         Logger.info("Starting Mini Factory Simulation Automation...");
 
         // ==============================
@@ -58,6 +59,7 @@ public class Main {
         ProductionLineService productionLineService =
                 new ProductionLineService(
                         stationRepository,
+                        productItemRepository,
                         conveyorRepository,
                         itemTrackingService,
                         sensorService,
@@ -80,7 +82,9 @@ public class Main {
                         simulationEngine,
                         productionLineService,
                         stationRepository,
-                        machineRepository
+                        machineRepository,
+                        productItemRepository,
+                        eventBus
                 );
 
         // ==============================

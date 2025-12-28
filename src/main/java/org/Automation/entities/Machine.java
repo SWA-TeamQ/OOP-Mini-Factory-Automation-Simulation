@@ -12,12 +12,14 @@ public class Machine {
     private final MachineType type;
     private MachineStatus status;
     private final Actuator actuator;
+    private final EventBus eventBus;
     private final Random random = new Random();
 
-    public Machine(String id, MachineType type, Actuator actuator) {
+    public Machine(String id, MachineType type, Actuator actuator, EventBus eventBus) {
         this.id = id;
         this.type = type;
         this.actuator = actuator;
+        this.eventBus = eventBus;
         this.status = MachineStatus.IDLE;
     }
 
@@ -31,12 +33,12 @@ public class Machine {
 
     public void process(ProductItem item) {
         if (status != MachineStatus.RUNNING) return;
-        try { Thread.sleep(500 + random.nextInt(1000)); } 
+        try { Thread.sleep(500 + random.nextInt(1000)); }
         catch (InterruptedException e) { Thread.currentThread().interrupt(); return; }
 
         if (random.nextInt(100) < 5) {
             status = MachineStatus.ERROR;
-            EventBus.publish("machine_error", this);
+            eventBus.publish("machine_error", this);
             return;
         }
         item.addHistory("Processed by " + type + " [" + id + "]");
@@ -45,7 +47,7 @@ public class Machine {
     public void repair() {
         if (status == MachineStatus.ERROR) {
             status = MachineStatus.IDLE;
-            EventBus.publish("machine_repaired", this);
+            eventBus.publish("machine_repaired", this);
         }
     }
 
