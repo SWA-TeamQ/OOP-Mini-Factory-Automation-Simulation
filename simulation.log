@@ -1,61 +1,6 @@
-[2025-12-28 14:38:03] [INFO] Starting Mini Factory Simulation Automation...
-[2025-12-28 14:38:10] [WARN] Factory reset complete. All data cleared.
-[2025-12-28 14:38:20] [INFO] Stopping simulation engine...
-[2025-12-28 14:38:21] [INFO] Starting simulation engine...
-[2025-12-28 14:38:21] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:22] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:23] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:24] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:25] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:26] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:27] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:28] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:29] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:30] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:31] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:32] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:32] [WARN] Factory reset complete. All data cleared.
-[2025-12-28 14:38:33] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:34] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:35] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:36] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:37] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:38] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:38] [INFO] Stopping simulation engine...
-[2025-12-28 14:38:42] [INFO] Starting simulation engine...
-[2025-12-28 14:38:42] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:43] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:44] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:45] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:46] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:47] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:48] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:49] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:50] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:51] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:52] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:53] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:54] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:55] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:56] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:57] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:58] [DEBUG] Simulation tick processed.
-[2025-12-28 14:38:59] [DEBUG] Simulation tick processed.
-[2025-12-28 14:39:00] [DEBUG] Simulation tick processed.
-[2025-12-28 14:39:01] [DEBUG] Simulation tick processed.
-[2025-12-28 14:39:02] [DEBUG] Simulation tick processed.
-[2025-12-28 14:39:03] [DEBUG] Simulation tick processed.
-[2025-12-28 14:39:04] [DEBUG] Simulation tick processed.
-[2025-12-28 14:39:05] [DEBUG] Simulation tick processed.
-[2025-12-28 14:39:06] [DEBUG] Simulation tick processed.
-[2025-12-28 14:39:07] [DEBUG] Simulation tick processed.
-[2025-12-28 14:39:08] [DEBUG] Simulation tick processed.
-[2025-12-28 14:39:09] [DEBUG] Simulation tick processed.
-[2025-12-28 14:39:10] [DEBUG] Simulation tick processed.
-[2025-12-28 14:39:11] [DEBUG] Simulation tick processed.
-[2025-12-28 14:39:12] [DEBUG] Simulation tick processed.
-[2025-12-28 14:39:12] [INFO] Stopping simulation engine...
-[2025-12-28 14:39:12] [INFO] Mini Factory Simulation Automation started successfully.
-[2025-12-28 14:39:13] [INFO] Shutting down system...
-[2025-12-28 14:39:13] [INFO] Stopping simulation engine...
-[2025-12-28 14:39:13] [INFO] System shutdown complete.
+[2025-12-28 22:33:33] [INFO] Starting Mini Factory Simulation Automation...
+[2025-12-28 22:41:03] [INFO] Stopping simulation engine...
+[2025-12-28 22:41:03] [INFO] Mini Factory Simulation Automation started successfully.
+[2025-12-28 22:41:03] [INFO] Shutting down system...
+[2025-12-28 22:41:03] [INFO] Stopping simulation engine...
+[2025-12-28 22:41:03] [INFO] System shutdown complete.
