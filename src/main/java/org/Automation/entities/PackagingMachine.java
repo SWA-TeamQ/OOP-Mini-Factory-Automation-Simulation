@@ -4,8 +4,8 @@ import org.Automation.entities.enums.MachineType;
 
 public class PackagingMachine extends Machine {
 
-    public PackagingMachine(String id, Actuator actuator) {
-        super(id, MachineType.PACKAGER, actuator);
+    public PackagingMachine(String id, Actuator actuator, org.Automation.core.EventBus eventBus) {
+        super(id, MachineType.PACKAGER, actuator, eventBus);
     }
 
     @Override

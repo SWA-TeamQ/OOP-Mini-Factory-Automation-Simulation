@@ -1,61 +1,132 @@
 package org.Automation.core;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.time.LocalDateTime;
+import java.sql.*;
 
-/**
- * Simulates persistence for the mini factory.
- */
-public class DatabaseManager {
+public final class DatabaseManager {
 
-    private static final String LOG_FILE = "factory_database.log";
-    private BufferedWriter writer;
-    private boolean active = true;
+  private Connection connection;
+  private final String url = "jdbc:sqlite:automation.sqlite";
 
-    public DatabaseManager() {
-        try {
-            writer = new BufferedWriter(new FileWriter(LOG_FILE, true));
-            log("DatabaseManager initialized");
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to initialize DatabaseManager", e);
-        }
+  public boolean connect() {
+    if (connection != null)
+      return true;
+
+    try {
+      connection = DriverManager.getConnection(url);
+      System.out.println("Connection to SQLite established.");
+      return true;
+    } catch (SQLException e) {
+      throw new RuntimeException("Failed to connect", e);
+    }
+  }
+
+  public Connection getConnection() {
+    return this.connection;
+  }
+
+  public boolean disconnect() {
+    try {
+      if (connection != null) {
+        connection.close();
+        System.out.println("Connection closed.");
+      }
+      return true;
+    } catch (SQLException e) {
+      throw new RuntimeException("Failed to disconnect", e);
+    }
+  }
+
+  // ------------ Helper method for parameter binding -------------
+  private void bindParams(PreparedStatement pstmt, Object[] params) throws SQLException {
+    if (params == null)
+      return;
+
+    for (int i = 0; i < params.length; i++) {
+      pstmt.setObject(i + 1, params[i]);
+    }
+  }
+
+  // ---------------- Helper method for SELECT queries ----------------
+  private ResultSet executeQuery(String sql, Object[] params) {
+    try {
+      PreparedStatement pstmt = connection.prepareStatement(sql);
+      bindParams(pstmt, params);
+      return pstmt.executeQuery();
+    } catch (SQLException e) {
+      throw new RuntimeException("Query execution failed: " + e.getMessage(), e);
+    }
+  }
+
+  // ---------------- Helper method for INSERT, UPDATE, DELETE ----------------
+  private boolean executeMutator(String sql, Object[] params) {
+    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+      bindParams(pstmt, params);
+      return pstmt.executeUpdate() > 0;
+    } catch (SQLException e) {
+      throw new RuntimeException("Mutator execution failed: " + e.getMessage(), e);
+    }
+  }
+
+  // ------------ Find (SELECT) -------------
+  public ResultSet find(String tableName, String where, Object[] params) {
+    String sql = "SELECT * FROM " + tableName;
+
+    if (where != null && !where.trim().isEmpty()) {
+      sql += " WHERE " + where;
     }
 
-    public synchronized void saveEvent(String eventType, String message) {
-        if (!active) return;
-        log("[EVENT] " + eventType + " | " + message);
+    return executeQuery(sql, params);
+  }
+
+  // ------------ INSERT -------------
+  public boolean insert(String tableName, String[] columns, Object[] values) {
+
+    if (columns.length != values.length)
+      throw new IllegalArgumentException("Columns and values length mismatch");
+
+    String cols = String.join(", ", columns);
+
+    // creating placeholders (?) for the statement
+    String placeholders = "";
+    for (int i = 0; i < values.length; i++) {
+      if (i < values.length - 1) {
+        placeholders += "?, ";
+      } else {
+        placeholders += "?";
+      }
     }
 
-    public synchronized void saveProductionRecord(String record) {
-        if (!active) return;
-        log("[PRODUCTION] " + record);
-    }
+    String sql = "INSERT INTO " + tableName + " (" + cols + ") VALUES (" + placeholders + ")";
 
-    public synchronized void saveError(String error) {
-        if (!active) return;
-        log("[ERROR] " + error);
-    }
+    return executeMutator(sql, values);
+  }
 
-    private void log(String message) {
-        try {
-            writer.write(LocalDateTime.now() + " :: " + message);
-            writer.newLine();
-            writer.flush();
-        } catch (IOException e) {
-            System.err.println("DatabaseManager write failure: " + e.getMessage());
-        }
-    }
+  // ------------ DELETE -------------
+  public boolean delete(String tableName, String where, Object[] params) {
+    String sql = "DELETE FROM " + tableName +
+        (where != null ? " WHERE " + where : "");
 
-    public synchronized void shutdown() {
-        if (!active) return;
-        try {
-            log("DatabaseManager shutting down");
-            writer.close();
-            active = false;
-        } catch (IOException e) {
-            System.err.println("Failed to close DatabaseManager: " + e.getMessage());
-        }
-    }
+    return executeMutator(sql, params);
+  }
+
+  // ------------ UPDATE -------------
+  public boolean update(String tableName, String setClause, String where, Object[] params) {
+
+    String sql = "UPDATE " + tableName + " SET " + setClause +
+        (where != null ? " WHERE " + where : "");
+
+    return executeMutator(sql, params);
+  }
+
+  public void shutdown() {
+    disconnect();
+  }
+
+  public void closeConnection() {
+    disconnect();
+  }
+
+  void Cleaner() {
+    disconnect();
+  }
 }

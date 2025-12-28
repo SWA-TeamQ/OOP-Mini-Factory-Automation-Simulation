@@ -26,6 +26,7 @@ public class Machine {
     public String getId() { return id; }
     public MachineType getType() { return type; }
     public MachineStatus getStatus() { return status; }
+    public void setStatus(MachineStatus status) { this.status = status; }
     public Actuator getActuator() { return actuator; }
 
     public void start() { if (status != MachineStatus.ERROR) status = MachineStatus.RUNNING; }

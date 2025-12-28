@@ -35,6 +35,8 @@ public class WorkFlowController {
             StationRepository stationRepository,
             MachineRepository machineRepository,
             ProductItemRepository productItemRepository,
+            ConveyorRepository conveyorRepository,
+            SensorRepository sensorRepository,
             EventBus eventBus
     ) {
         this.simulationEngine = simulationEngine;
@@ -42,38 +44,9 @@ public class WorkFlowController {
         this.stationRepo = stationRepository;
         this.machineRepo = machineRepository;
         this.productRepo = productItemRepository;
+        this.conveyorRepo = conveyorRepository;
+        this.sensorRepo = sensorRepository;
         this.eventBus = eventBus;
-    }
-
-    public WorkFlowController() {
-        // Repositories
-        this.stationRepo = new StationRepository();
-        this.machineRepo = new MachineRepository();
-        this.productRepo = new ProductItemRepository();
-        this.conveyorRepo = new ConveyorRepository();
-        this.sensorRepo = new SensorRepository();
-
-        // Event bus
-        this.eventBus = new org.Automation.core.EventBus();
-
-        // Services
-        this.itemTrackingService = new ItemTrackingService(productRepo, eventBus);
-        this.sensorService = new SensorService(sensorRepo, eventBus);
-        this.actuatorService = new ActuatorService(machineRepo, eventBus);
-
-        this.productionLineService = new ProductionLineService(
-                stationRepo,
-                productRepo,
-                conveyorRepo,
-                itemTrackingService,
-                sensorService,
-                actuatorService,
-                eventBus
-        );
-
-        // Simulation engine
-        this.simulationClock = new SimulationClock();
-        this.simulationEngine = new SimulationEngine(simulationClock, productionLineService);
     }
 
     public WorkFlowController(

@@ -34,15 +34,30 @@ public class Main {
         // ==============================
         EventBus eventBus = new EventBus();
         DatabaseManager databaseManager = new DatabaseManager();
+        databaseManager.connect();
+
+        // Fresh Start Check
+        if (args.length > 0 && args[0].equalsIgnoreCase("--fresh")) {
+            Logger.warn("Fresh start requested. Clearing database...");
+            try (java.sql.Statement stmt = databaseManager.getConnection().createStatement()) {
+                stmt.execute("DROP TABLE IF EXISTS Station");
+                stmt.execute("DROP TABLE IF EXISTS Machine");
+                stmt.execute("DROP TABLE IF EXISTS ProductItem");
+                stmt.execute("DROP TABLE IF EXISTS Sensor");
+                stmt.execute("DROP TABLE IF EXISTS ConveyorBelt");
+            } catch (java.sql.SQLException e) {
+                Logger.error("Failed to clear database: " + e.getMessage());
+            }
+        }
 
         // ==============================
         // 3️⃣ REPOSITORIES (DATA LAYER)
         // ==============================
-        StationRepository stationRepository = new StationRepository();
-        MachineRepository machineRepository = new MachineRepository();
-        ProductItemRepository productItemRepository = new ProductItemRepository();
-        ConveyorRepository conveyorRepository = new ConveyorRepository();
-        SensorRepository sensorRepository = new SensorRepository();
+        StationRepository stationRepository = new StationRepository(databaseManager);
+        MachineRepository machineRepository = new MachineRepository(databaseManager, eventBus);
+        ProductItemRepository productItemRepository = new ProductItemRepository(databaseManager);
+        ConveyorRepository conveyorRepository = new ConveyorRepository(databaseManager);
+        SensorRepository sensorRepository = new SensorRepository(databaseManager, eventBus);
 
         // ==============================
         // 4️⃣ SERVICES (BUSINESS LOGIC)
@@ -84,6 +99,8 @@ public class Main {
                         stationRepository,
                         machineRepository,
                         productItemRepository,
+                        conveyorRepository,
+                        sensorRepository,
                         eventBus
                 );
 
@@ -91,7 +108,7 @@ public class Main {
         // 7️⃣ USER INTERFACE
         // ==============================
         ConsoleApp consoleApp =
-                new ConsoleApp();
+                new ConsoleApp(workFlowController);
 
         // ==============================
         // 8️⃣ SHUTDOWN HOOK
