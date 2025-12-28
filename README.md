@@ -79,26 +79,15 @@ These make it easier to understand how large systems are built from small, inter
 ## 🖥️ How to Use
 
 ### Running the Simulator
-This is a **Maven** project (see `pom.xml`). The simplest way to build and run it is with **Java + Maven**.
-
-#### Prerequisites
-- **Java (JDK)**: this project is configured for **Java 22** in `pom.xml`
-- **Maven**: `mvn` available on your PATH
-
-#### Run (recommended)
-From the project root:
-
-```bash
-mvn clean compile exec:java
-```
-
-#### If you tried `javac Main.java` and got “cannot find symbol ConsoleApp”
-That happens when you compile **only one file** from inside a package folder. This project uses packages like:
-`package org.Automation;` and `package org.Automation.ui;`, so `javac Main.java` will not automatically compile and link
-the rest of the source tree (and won’t pull Maven dependencies like SQLite JDBC). Maven fixes this by compiling everything
-under `src/main/java` with the correct classpath.
-
-After launching, follow the on-screen menu to:
+1. Compile all Java files:
+   ```bash
+   javac *.java
+   ```
+2. Run the main class:
+   ```bash
+   java Main
+   ```
+3. Follow the on-screen menu to:
    - Load a factory scenario
    - Start/pause the simulation
    - Add items manually
@@ -121,7 +110,7 @@ src/
 ├── FactoryController.java // Central coordinator
 ├── DatabaseManager.java  // Logs and stores simulation data
 ├── UserInterface.java    // Console menu handler
-└── Main.java           // Entry point (`org.Automation.Main`)
+└── Main.java           // Entry point
 ```
 
 ---
