@@ -30,10 +30,7 @@ public class ConveyorRepository extends Repository<ConveyorBelt> {
     public void save(ConveyorBelt conveyor) {
         String[] columns = {"id", "speed"};
         Object[] values = {conveyor.getId(), conveyor.getSpeed()};
-        
-        if (!db.update(tableName, "speed=?", "id=?", new Object[]{values[1], values[0]})) {
-            db.insert(tableName, columns, values);
-        }
+        db.insert(tableName, columns, values);
     }
 
     public void delete(String id) {

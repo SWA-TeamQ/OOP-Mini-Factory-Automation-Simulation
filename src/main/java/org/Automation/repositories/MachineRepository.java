@@ -45,10 +45,7 @@ public class MachineRepository extends Repository<Machine> {
             machine.getType().toString(),
             machine.getStatus().toString()
         };
-        
-        if (!db.update(tableName, "type=?, status=?", "id=?", new Object[]{values[1], values[2], values[0]})) {
-            db.insert(tableName, columns, values);
-        }
+        db.insert(tableName, columns, values);
     }
 
     public void delete(String id) {

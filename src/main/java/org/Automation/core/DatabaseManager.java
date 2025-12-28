@@ -96,7 +96,7 @@ public final class DatabaseManager {
       }
     }
 
-    String sql = "INSERT INTO " + tableName + " (" + cols + ") VALUES (" + placeholders + ")";
+    String sql = "INSERT OR REPLACE INTO " + tableName + " (" + cols + ") VALUES (" + placeholders + ")";
 
     return executeMutator(sql, values);
   }
