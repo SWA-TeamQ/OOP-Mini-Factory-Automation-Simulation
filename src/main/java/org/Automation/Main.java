@@ -19,6 +19,7 @@ import org.Automation.ui.ConsoleApp;
  *  - Starting the UI
  *  - Graceful shutdown
  */
+
 public class Main {
 
     public static void main(String[] args) {
@@ -85,9 +86,8 @@ public class Main {
         // ==============================
         // 5️⃣ SIMULATION ENGINE
         // ==============================
-        SimulationClock simulationClock = new SimulationClock();
         SimulationEngine simulationEngine =
-                new SimulationEngine(simulationClock, productionLineService);
+                new SimulationEngine();
 
         // ==============================
         // 6️⃣ CONTROLLER (ORCHESTRATOR)
@@ -116,7 +116,7 @@ public class Main {
         // ==============================
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             Logger.info("Shutting down system...");
-            simulationEngine.stop();
+            simulationEngine.stopSimulation();
             databaseManager.shutdown();
             Logger.info("System shutdown complete.");
         }));

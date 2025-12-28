@@ -170,18 +170,10 @@ public void startProduction() {
         System.out.println("Production already running.");
         return;
     }
+;
+    simulationEngine = new SimulationEngine();
 
-    simulationClock = new SimulationClock();
-    simulationEngine = new SimulationEngine(
-            simulationClock,
-            new ProductionLineService(stationRepo, productRepo, conveyorRepo, new ItemTrackingService(productRepo, eventBus),
-                    new SensorService(sensorRepo, eventBus),
-                    new ActuatorService(machineRepo, eventBus),
-                    eventBus),
-            stationRepo
-    );
-
-    simulationEngine.start();
+    simulationEngine.startSimulation();
     System.out.println("Production started.");
 }
 
@@ -190,7 +182,7 @@ public void startProduction() {
  */
 public void stopProduction() {
     if (simulationEngine != null) {
-        simulationEngine.stop();
+        simulationEngine.stopSimulation();
         simulationEngine = null;
         simulationClock = null;
         System.out.println("Production stopped.");
