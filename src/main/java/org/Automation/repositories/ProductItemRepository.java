@@ -31,12 +31,22 @@ public class ProductItemRepository extends Repository<ProductItem> {
 
     @Override
     public void save(ProductItem item) {
-        String[] columns = {"id", "completed"};
-        Object[] values = {
-            item.getId(),
-            item.isCompleted() ? 1 : 0
-        };
-        db.insert(tableName, columns, values);
+        // Upsert behavior: update if exists, otherwise insert.
+        boolean updated = db.update(
+                tableName,
+                "completed=?",
+                "id=?",
+                new Object[]{item.isCompleted() ? 1 : 0, item.getId()}
+        );
+
+        if (!updated) {
+            String[] columns = {"id", "completed"};
+            Object[] values = {
+                    item.getId(),
+                    item.isCompleted() ? 1 : 0
+            };
+            db.insert(tableName, columns, values);
+        }
     }
 
     public void delete(String id) {
