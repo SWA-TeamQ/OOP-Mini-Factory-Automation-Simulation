@@ -13,39 +13,35 @@ public class StationRepository extends Repository<Station> {
     }
 
     @Override
-public String createTableQuery() {
-    return """
-            CREATE TABLE IF NOT EXISTS Station (
-                id TEXT PRIMARY KEY,
-                type TEXT NOT NULL,
-                status TEXT DEFAULT 'IDLE'
-            );
-            """;
-}
+    public String createTableQuery() {
+        return """
+                CREATE TABLE IF NOT EXISTS Station (
+                    id TEXT PRIMARY KEY,
+                    type TEXT NOT NULL,
+                    status TEXT DEFAULT 'IDLE'
+                );
+                """;
+    }
 
-@Override
-protected Station mapRow(ResultSet rs) throws SQLException {
-    return EntityFactory.createStation(
-        rs.getString("type"),
-        rs.getString("id"),
-        rs.getString("status")
-    );
-}
+    @Override
+    protected Station mapRow(ResultSet rs) throws SQLException {
+        return EntityFactory.createStation(
+            rs.getString("type"),
+            rs.getString("id"),
+            rs.getString("status")
+        );
+    }
 
-@Override
-public void save(Station station) {
-    String[] columns = {"id", "type", "status"};
-    Object[] values = {
-        station.getId(),
-        station.getClass().getSimpleName().replace("Station", ""),
-        station.getStatus().toString()
-    };
-    
-    // Try update first, if fails, insert
-    if (!db.update(tableName, "type=?, status=?", "id=?", new Object[]{values[1], values[2], values[0]})) {
+    @Override
+    public void save(Station station) {
+        String[] columns = {"id", "type", "status"};
+        Object[] values = {
+            station.getId(),
+            station.getClass().getSimpleName().replace("Station", ""),
+            station.getStatus().toString()
+        };
         db.insert(tableName, columns, values);
     }
-}
 
     public void delete(String id) {
         db.delete(tableName, "id=?", new Object[]{id});

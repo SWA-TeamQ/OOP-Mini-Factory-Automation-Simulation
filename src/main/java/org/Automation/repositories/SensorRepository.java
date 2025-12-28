@@ -47,10 +47,7 @@ public class SensorRepository extends Repository<Sensor> {
             null, // machineId not in entity yet
             null  // status not in entity yet
         };
-        
-        if (!db.update(tableName, "type=?, machineId=?, status=?", "id=?", new Object[]{values[1], values[2], values[3], values[0]})) {
-            db.insert(tableName, columns, values);
-        }
+        db.insert(tableName, columns, values);
     }
 
     public void delete(String id) {
