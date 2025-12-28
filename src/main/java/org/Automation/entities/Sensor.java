@@ -4,17 +4,22 @@ import org.Automation.core.EventBus;
 
 public class Sensor {
     private String id;
-    private final EventBus eventBus;
+    private String type;
+    private String machineId; // optional: if sensor is tied to a machine
+    private String status; // optional: active, inactive
+    private double currentValue; // stores current reading
 
-    public Sensor(String id, EventBus eventBus) {
+    public Sensor(String id, String type) {
         this.id = id;
-        this.eventBus = eventBus;
-    }
-    public String getId(){
-        return id;
+        this.type = type;
+        this.status = "active";
+        this.currentValue = 0.0;
     }
 
-    public void trigger(String event, Object payload) {
-        eventBus.publish(event, payload);
-    }
+    // getters & setters
+    public String getId() { return id; }
+    public String getType() { return type; }
+    public double getCurrentValue() { return currentValue; }
+    public void setCurrentValue(double value) { this.currentValue = value; }
+    public void setStatus(String Status){this.status=Status;}
 }

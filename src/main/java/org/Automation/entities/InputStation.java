@@ -10,11 +10,12 @@ public class InputStation extends Station {
     }
 
     // Produces new items into the production line
-    public ProductItem createItem(String productId) {
-        ProductItem newItem = new ProductItem(productId);
-        addItem(newItem);
-        return newItem;
-    }
+   public ProductItem createItem(String productId, String tempSensorId, String weightSensorId) {
+    ProductItem newItem = new ProductItem(productId, tempSensorId, weightSensorId);
+    addItem(newItem);
+    return newItem;
+}
+
 
     @Override
     public void processItems() {

@@ -8,7 +8,6 @@ import org.Automation.entities.enums.*;
  * This makes it easy to reconstruct objects from database/file records.
  */
 public class EntityFactory {
-
     public static Station createStation(String type, String id, String status) {
         Station station = switch (type.toUpperCase()) {
             case "INPUT" -> new InputStation(id);
@@ -31,15 +30,12 @@ public class EntityFactory {
         return machine;
     }
 
-    public static ProductItem createProductItem(String id, String name, double weight, String status, String createdAt, String currentStationId) {
-        ProductItem item = new ProductItem(id);
-        // Assuming ProductItem has these fields and setters or a constructor that takes them
-        return item;
+    public static ProductItem createProductItem(String id, String tempSensorId, String weightSensorId) {
+        return new ProductItem(id, tempSensorId, weightSensorId);
     }
-    
-    public static Sensor createSensor(String id, String type, String machineId, String status, EventBus eventBus) {
-        Sensor sensor = new Sensor(id, eventBus);
-        // Set other properties if available
-        return sensor;
+
+     public static Sensor createSensor(String id, String type) {
+        return new Sensor(id, type); // just create object, no repo
     }
+
 }

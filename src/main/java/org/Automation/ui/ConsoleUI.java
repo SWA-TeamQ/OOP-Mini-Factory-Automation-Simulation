@@ -1,10 +1,12 @@
 package org.Automation.ui;
 
 import org.Automation.Controllers.WorkFlowController;
+import org.Automation.entities.ProductItem;
 import org.Automation.ui.helpers.EventLog;
 import org.Automation.ui.helpers.FactorySnapshotView;
 import org.Automation.ui.helpers.StatusView;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class ConsoleUI {
@@ -27,6 +29,12 @@ public class ConsoleUI {
 
    public void start() {
     boolean running = true;
+// List<ProductItem> products = List.of(
+//     new ProductItem("ITEM-001"),
+//     new ProductItem("ITEM-002")
+// );
+
+
 
     while (running) {
         showMenu();
@@ -34,11 +42,24 @@ public class ConsoleUI {
         scanner.nextLine(); // consume newline
 
         switch (choice) {
-            case 1 -> controller.startProduction();
+            case 1 -> {
+                controller.startProduction();
+                // In the simulation loop:
+                if (controller.isProductionRunning()) {
+                    controller.runProductionStep(); // one tick per second
+                }
+                }
             case 2 -> controller.stopProduction();
             case 3 -> snapshotView.displaySnapshot();
             case 4 -> statusView.displayMachineStatus();
             case 5 -> displayEventLog();
+            case 6 -> {
+    System.out.print("Enter product ID to add: ");
+    String id = scanner.nextLine();
+    controller.addProductItemFromUser(id);
+    System.out.println("Product item added: " + id);
+}
+
             case 0 -> {
                 controller.stopProduction();
                 System.out.println("Exiting simulation...");
@@ -70,6 +91,7 @@ private void showMenu() {
     System.out.println("3. View Factory Snapshot");
     System.out.println("4. View Machine Status");
     System.out.println("5. View Event Log");
+    System.out.println("6. Add Product Item");
     System.out.println("0. Exit");
     System.out.print("Select an option: ");
 }

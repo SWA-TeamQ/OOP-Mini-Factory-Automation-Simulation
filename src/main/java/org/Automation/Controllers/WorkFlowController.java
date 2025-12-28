@@ -1,69 +1,40 @@
 package org.Automation.Controllers;
 
-import org.Automation.entities.*;
+import org.Automation.entities.ProductItem;
+import org.Automation.entities.Station;
+import org.Automation.entities.Machine;
 import org.Automation.repositories.*;
 import org.Automation.services.*;
 import org.Automation.core.EventBus;
 import org.Automation.core.Logger;
-import org.Automation.engine.SimulationClock;
 import org.Automation.engine.SimulationEngine;
 import org.Automation.core.DatabaseManager;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 /**
- * Coordinates the mini factory workflow.
+ * Coordinates the mini factory workflow with queue-based production.
  */
 public class WorkFlowController {
 
-    private  MachineRepository machineRepo;
-    private  StationRepository stationRepo;
-    private  ProductItemRepository productRepo;
-    private  ConveyorRepository conveyorRepo;
-    private  SensorRepository sensorRepo;
-    private  EventBus eventBus;
-    private  DatabaseManager db;
+    private final MachineRepository machineRepo;
+    private final StationRepository stationRepo;
+    private final ProductItemRepository productRepo;
+    private final ConveyorRepository conveyorRepo;
+    private final SensorRepository sensorRepo;
+    private final EventBus eventBus;
+    private final DatabaseManager db;
 
-    private ActuatorService actuatorService;
-    private ItemTrackingService itemTrackingService;
-    private SensorService sensorService;
-    private ProductionLineService productionLineService;
+    private final ActuatorService actuatorService;
+    private final ItemTrackingService itemTrackingService;
+    private final SensorService sensorService;
+    private final ProductionLineService productionLineService;
     private SimulationEngine simulationEngine;
-    private SimulationClock simulationClock;
+
+    private final Queue<ProductItem> productionQueue = new LinkedList<>();
     private boolean productionRunning = false;
-
-    public WorkFlowController(
-            ProductionLineService productionLineService,
-            StationRepository stationRepository,
-            MachineRepository machineRepository,
-            ProductItemRepository productItemRepository,
-            ConveyorRepository conveyorRepository,
-            SensorRepository sensorRepository,
-            EventBus eventBus,
-            DatabaseManager db
-    ) {
-        this.productionLineService = productionLineService;
-        this.stationRepo = stationRepository;
-        this.machineRepo = machineRepository;
-        this.productRepo = productItemRepository;
-        this.conveyorRepo = conveyorRepository;
-        this.sensorRepo = sensorRepository;
-        this.eventBus = eventBus;
-        this.db = db;
-    }
-
-    public void resetFactory() {
-        if (db != null) {
-            db.clearDatabase();
-            // Re-create tables
-            stationRepo.ensureTableExists();
-            machineRepo.ensureTableExists();
-            productRepo.ensureTableExists();
-            conveyorRepo.ensureTableExists();
-            sensorRepo.ensureTableExists();
-            Logger.warn("Factory reset complete. All data cleared.");
-        }
-    }
 
     public WorkFlowController(
             MachineRepository machineRepo,
@@ -97,7 +68,12 @@ public class WorkFlowController {
         );
 
         subscribeEvents();
+        // Create default sensors
+    sensorService.createSensor("TEMP_SENSOR_01", "Temperature Sensor");
+    sensorService.createSensor("WEIGHT_SENSOR_01", "Weight Sensor");
+
     }
+
 
     private void subscribeEvents() {
         eventBus.subscribe("machine_error", payload -> Logger.error("Machine error: " + payload));
@@ -106,41 +82,117 @@ public class WorkFlowController {
         eventBus.subscribe("item_completed", payload -> Logger.info("Item completed: " + payload));
     }
 
-    /**
-     * Starts the production workflow for a list of product items.
-     */
-    public void startProduction(List<ProductItem> items) {
-        Logger.info("Starting production of " + items.size() + " items");
+    // -------------------- Production Methods --------------------
 
-        for (ProductItem item : items) {
-            productionLineService.process(item);
-            Logger.info("Finished processing item: " + item.getId());
+    /**
+     * Start production with a list of user-provided items.
+     */
+   public void startProduction() {
+    if (productionRunning) {
+        System.out.println("Production already running.");
+        return;
+    }
+
+    enqueueUserProducts();
+
+    if (productionQueue.isEmpty()) {
+        System.out.println("No products to process. Add items first.");
+        return;
+    }
+
+    productionRunning = true;
+
+    if (simulationEngine != null) simulationEngine.startSimulation();
+
+    Logger.info("Production started with " + productionQueue.size() + " items.");
+}
+
+
+
+    /**
+     * Stop production manually.
+     */
+    public void stopProduction() {
+        if (!productionRunning) {
+            System.out.println("No production is running.");
+            return;
         }
 
-        Logger.info("Production run completed");
+        if (simulationEngine != null) {
+            simulationEngine.stopSimulation();
+        }
+        productionRunning = false;
+        productionQueue.clear();
+
+        Logger.info("Production stopped.");
     }
 
     /**
-     * Add a station to the factory
+     * Returns whether production is currently running.
      */
+    public boolean isProductionRunning() {
+        return productionRunning;
+    }
+
+    /**
+     * Process one item from the queue (called per simulation tick).
+     */
+    /**
+ * Process one item from the queue (called per simulation tick).
+ */
+public void runProductionStep() {
+    if (!productionRunning) return;
+
+    ProductItem item = productionQueue.poll();
+if (item == null) { stopProduction(); return; }
+
+productionLineService.process(item);
+
+// Read sensors for this product
+double temp = sensorService.readSensor(item.getTempSensorId());
+double weight = sensorService.readSensor(item.getWeightSensorId());
+
+System.out.println(
+    "Product " + item.getId() +
+    " processed: Temp=" + String.format("%.2f", temp) +
+    "°C, Weight=" + String.format("%.2f", weight) + "kg"
+);
+
+Logger.info("Simulation step processed item: " + item.getId());
+eventBus.publish("item_completed", item);
+
+    System.out.println("Product " + item.getId() + " processed: Temp=" + temp + "°C, Weight=" + weight + "kg");
+
+    Logger.info("Simulation step processed item: " + item.getId());
+    eventBus.publish("item_completed", item);
+}
+
+
+
+
+    /**
+     * Set the simulation engine instance.
+     */
+    public void setSimulationEngine(SimulationEngine simulationEngine) {
+        this.simulationEngine = simulationEngine;
+    }
+
+    // -------------------- Utility Methods --------------------
+
     public void addStation(Station station) {
         stationRepo.save(station);
     }
 
-    /**
-     * Add a machine to the factory
-     */
     public void addMachine(Machine machine) {
         machineRepo.save(machine);
     }
 
-    /**
-     * Add a product item
-     */
     public void addProductItem(ProductItem item) {
         productRepo.save(item);
     }
-    public StationRepository getStationRepository() {
+
+    // Add these back inside WorkFlowController
+public StationRepository getStationRepository() {
     return stationRepo;
 }
 
@@ -160,62 +212,19 @@ public SensorRepository getSensorRepository() {
     return sensorRepo;
 }
 
-public EventBus getEventBus() {
-    return eventBus;
-}
-
-public void startProduction() {
-    if (productionRunning) {
-        System.out.println("Production already running.");
-        return;
-    }
-
-    productionRunning = true;
-    simulationEngine.startSimulation();
-    Logger.info("Production started.");
-}
-
-
-
-
-
-/**
- * Stop the simulation.
- */
-public void stopProduction() {
-    if (!productionRunning) {
-        System.out.println("No production is running.");
-        return;
-    }
-
-    simulationEngine.stopSimulation();
-    productionRunning = false;
-
-    Logger.info("Production stopped.");
-}
-
-
-public boolean isProductionRunning() {
-    return productionRunning;
-}
-
-public void runProductionStep() {
-    if (!productionRunning) {
-        return;
-    }
-
-    String id = "ITEM-" + System.currentTimeMillis();
-
-    ProductItem item = new ProductItem(id);
+public void addProductItemFromUser(String id) {
+    // Assign default sensors to new product
+    ProductItem item = new ProductItem(id, "TEMP_SENSOR_01", "WEIGHT_SENSOR_01");
     productRepo.save(item);
-
-    productionLineService.process(item);
-
-    Logger.info("Simulation step processed item: " + item.getId());
+    Logger.info("User added item: " + id);
 }
 
-public void setSimulationEngine(SimulationEngine simulationEngine) {
-    this.simulationEngine = simulationEngine;
+
+public void enqueueUserProducts() {
+    List<ProductItem> items = productRepo.findAll(); // get all user-added products
+    productionQueue.addAll(items);
 }
+
+
 
 }

@@ -19,24 +19,28 @@ public class SensorRepository extends Repository<Sensor> {
     public String createTableQuery() {
         return """
                 CREATE TABLE IF NOT EXISTS Sensor (
-                    id TEXT PRIMARY KEY,
-                    type TEXT,
-                    machineId TEXT,
-                    status TEXT DEFAULT 'inactive'
-                );
+    id TEXT PRIMARY KEY,
+    type TEXT,
+    machineId TEXT,
+    status TEXT,
+    currentValue REAL
+);
                 """;
     }
 
-    @Override
-    protected Sensor mapRow(ResultSet rs) throws SQLException {
-        return EntityFactory.createSensor(
-            rs.getString("id"),
-            rs.getString("type"),
-            rs.getString("machineId"),
-            rs.getString("status"),
-            eventBus
-        );
-    }
+   @Override
+protected Sensor mapRow(ResultSet rs) throws SQLException {
+    String id = rs.getString("id");
+    String type = rs.getString("type");
+    String status = rs.getString("status");
+
+    Sensor sensor = EntityFactory.createSensor(id, type);
+    sensor.setCurrentValue(rs.getDouble("currentValue")); // if stored in DB
+    sensor.setStatus(status);
+
+    return sensor;
+}
+
 
     @Override
     public void save(Sensor sensor) {
