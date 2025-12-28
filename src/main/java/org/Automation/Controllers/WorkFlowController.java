@@ -21,6 +21,7 @@ public class WorkFlowController {
     private  ConveyorRepository conveyorRepo;
     private  SensorRepository sensorRepo;
     private  EventBus eventBus;
+    private  DatabaseManager db;
 
     private ActuatorService actuatorService;
     private ItemTrackingService itemTrackingService;
@@ -37,7 +38,8 @@ public class WorkFlowController {
             ProductItemRepository productItemRepository,
             ConveyorRepository conveyorRepository,
             SensorRepository sensorRepository,
-            EventBus eventBus
+            EventBus eventBus,
+            DatabaseManager db
     ) {
         this.simulationEngine = simulationEngine;
         this.productionLineService = productionLineService;
@@ -47,6 +49,20 @@ public class WorkFlowController {
         this.conveyorRepo = conveyorRepository;
         this.sensorRepo = sensorRepository;
         this.eventBus = eventBus;
+        this.db = db;
+    }
+
+    public void resetFactory() {
+        if (db != null) {
+            db.clearDatabase();
+            // Re-create tables
+            stationRepo.ensureTableExists();
+            machineRepo.ensureTableExists();
+            productRepo.ensureTableExists();
+            conveyorRepo.ensureTableExists();
+            sensorRepo.ensureTableExists();
+            Logger.warn("Factory reset complete. All data cleared.");
+        }
     }
 
     public WorkFlowController(
@@ -55,7 +71,8 @@ public class WorkFlowController {
             ProductItemRepository productRepo,
             ConveyorRepository conveyorRepo,
             SensorRepository sensorRepo,
-            EventBus eventBus
+            EventBus eventBus,
+            DatabaseManager db
     ) {
         this.machineRepo = machineRepo;
         this.stationRepo = stationRepo;
@@ -63,6 +80,7 @@ public class WorkFlowController {
         this.conveyorRepo = conveyorRepo;
         this.sensorRepo = sensorRepo;
         this.eventBus = eventBus;
+        this.db = db;
 
         this.actuatorService = new ActuatorService(machineRepo, eventBus);
         this.itemTrackingService = new ItemTrackingService(productRepo, eventBus);

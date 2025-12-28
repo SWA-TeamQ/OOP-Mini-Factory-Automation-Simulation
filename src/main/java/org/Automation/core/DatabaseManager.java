@@ -118,6 +118,19 @@ public final class DatabaseManager {
     return executeMutator(sql, params);
   }
 
+  public void clearDatabase() {
+    try (Statement stmt = connection.createStatement()) {
+      stmt.execute("DROP TABLE IF EXISTS Station");
+      stmt.execute("DROP TABLE IF EXISTS Machine");
+      stmt.execute("DROP TABLE IF EXISTS ProductItem");
+      stmt.execute("DROP TABLE IF EXISTS Sensor");
+      stmt.execute("DROP TABLE IF EXISTS ConveyorBelt");
+      System.out.println("Database cleared successfully.");
+    } catch (SQLException e) {
+      throw new RuntimeException("Failed to clear database", e);
+    }
+  }
+
   public void shutdown() {
     disconnect();
   }

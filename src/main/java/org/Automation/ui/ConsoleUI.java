@@ -37,6 +37,12 @@ public class ConsoleUI {
                 case 3 -> snapshotView.displaySnapshot();
                 case 4 -> statusView.displayMachineStatus();
                 case 5 -> displayEventLog();
+                case 6 -> {
+                    System.out.print("Are you sure you want to clear all data? (y/n): ");
+                    if (scanner.nextLine().equalsIgnoreCase("y")) {
+                        controller.resetFactory();
+                    }
+                }
                 case 0 -> {
                     controller.stopProduction();
                     System.out.println("Exiting simulation...");
@@ -54,6 +60,7 @@ public class ConsoleUI {
         System.out.println("3. View Factory Snapshot");
         System.out.println("4. View Machine Status");
         System.out.println("5. View Event Log");
+        System.out.println("6. Fresh Start (Clear Database)");
         System.out.println("0. Exit");
         System.out.print("Select an option: ");
     }

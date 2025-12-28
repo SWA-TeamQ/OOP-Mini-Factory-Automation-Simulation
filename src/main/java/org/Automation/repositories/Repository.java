@@ -17,7 +17,7 @@ public abstract class Repository<T> {
         ensureTableExists();
     }
 
-    private void ensureTableExists() {
+    public void ensureTableExists() {
         try (java.sql.Statement stmt = db.getConnection().createStatement()) {
             stmt.execute(createTableQuery());
         } catch (SQLException e) {

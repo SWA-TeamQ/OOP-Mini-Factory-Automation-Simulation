@@ -101,7 +101,8 @@ public class Main {
                         productItemRepository,
                         conveyorRepository,
                         sensorRepository,
-                        eventBus
+                        eventBus,
+                        databaseManager
                 );
 
         // ==============================
