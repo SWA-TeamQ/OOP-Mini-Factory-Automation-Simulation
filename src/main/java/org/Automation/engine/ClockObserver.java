@@ -1,5 +1,8 @@
 package org.Automation.engine;
 
+import java.time.LocalDateTime;
+
+
 public interface ClockObserver {
-    void tick(long currentTime);
+  void onTick(LocalDateTime currentSecond);
 }

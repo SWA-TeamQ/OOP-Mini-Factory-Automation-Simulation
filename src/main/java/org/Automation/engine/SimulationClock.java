@@ -1,44 +1,76 @@
 package org.Automation.engine;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class SimulationClock {
-    private long currentTime = 0;
-    private long tickIntervalMillis = 1000;
-    private boolean running = false;
-    private final List<ClockObserver> observers = new ArrayList<>();
+  // Singleton instance
+  private static SimulationClock instance;
 
-    public void registerObserver(ClockObserver observer) {
-        observers.add(observer);
-    }
+  // Instance Variables
+  private LocalDateTime currentSecond = LocalDateTime.now();
+  private boolean paused = true;
+  private int speedFactor = 1;
 
-    public void start() {
-        running = true;
-        new Thread(() -> {
-            while (running) {
-                try {
-                    Thread.sleep(tickIntervalMillis);
-                    currentTime++;
-                    for (ClockObserver observer : observers) {
-                        observer.tick(currentTime);
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }).start();
-    }
+  // well we set it into a task per 50 milliseconds, meaning 20 times in a second
+  private final int Tick_Per_MS = 50;
 
-    public void stop() {
-        running = false;
-    }
+  private ArrayList<ClockObserver> observers = new ArrayList<ClockObserver>();
+  private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-    public long getCurrentTime() {
-        return currentTime;
-    }
+  // for the entire system to work on the same time
+  private SimulationClock() {
+    scheduler.scheduleAtFixedRate(() -> tick(), 1000, Tick_Per_MS, TimeUnit.MILLISECONDS);
+  }
 
-    public void setTickIntervalMillis(long tickIntervalMillis) {
-        this.tickIntervalMillis = tickIntervalMillis;
+  public static synchronized SimulationClock getInstance() {
+    // used to create a single instance for all tasks
+    if (instance == null) {
+      instance = new SimulationClock();
     }
+    return instance;
+  }
+
+  // Instance Methods
+  private void tick() {
+    if (paused)
+      return;
+
+    // NOTE: Line changed here
+    currentSecond.plusSeconds((Tick_Per_MS * speedFactor) / 1000);
+
+    for (ClockObserver observer : observers)
+      observer.onTick(currentSecond);
+  }
+
+  // NOTE: Custom method added here
+  public LocalDateTime getCurrentTime() {
+    return currentSecond;
+  }
+
+  public synchronized void register(ClockObserver observer) {
+    observers.add(observer);
+  }
+
+  public void start() {
+    paused = false;
+    System.out.println("The Simulation has been started at time: \n" + currentSecond);
+  }
+
+  public void stop() {
+    paused = true;
+    System.out.println("The Simulation has been stopped at time: \n" + currentSecond);
+  }
+
+  public void setSpeedFactor(int speed) {
+    speedFactor = speed;
+    System.out.println("The Simulation speed has been updated into: \n" + speedFactor);
+  }
+
+  public LocalDateTime getCurrentSecond() {
+    return currentSecond;
+  }
 }
