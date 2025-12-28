@@ -31,11 +31,8 @@ public abstract class Sensor {
     protected volatile double primaryIncrement;
     protected volatile double coolingRate;
 
-    // control / automation flags (default: automatic and control enabled)
+    // automation flag (default: automatic enabled)
     protected volatile boolean automaticMode = true;
-    protected volatile boolean controlEnabled = true;
-    protected volatile double controlTarget = 0.0;
-    protected volatile double controlTolerance = 0.0;
 
     protected Sensor(String sensorType, String location, String status) {
         this.sensorId = ID_GEN.getAndIncrement();
@@ -71,23 +68,6 @@ public abstract class Sensor {
     // -----------------------
     // Lifecycle (centralized)
     // -----------------------
-    public synchronized void start() {
-        if (isActive) throw new IllegalStateException("Sensor " + sensorId + " is already active.");
-        isActive = true;
-        startTime = LocalDateTime.now();
-        stopTime = null;
-        setStatus("Active");
-        onStart();
-    }
-
-    public synchronized void stop() {
-        if (!isActive) return;
-        isActive = false;
-        stopTime = LocalDateTime.now();
-        onStop();
-        setStatus("Stopped");
-    }
-
     protected void activateSensor() { isActive = true; setStatus("Active"); }
     protected void deactivateSensor() { isActive = false; setStatus("Paused"); }
 
@@ -113,30 +93,6 @@ public abstract class Sensor {
         else if (!valid) setStatus("Error");
         else setStatus("OK");
     }
-
-    // -----------------------
-    // Control / automation API
-    // -----------------------
-    public void enableAutomaticMode() { this.automaticMode = true; setStatus("AutoMode"); }
-    public void disableAutomaticMode() { this.automaticMode = false; setStatus("ManualMode"); }
-    public boolean isAutomaticMode() { return automaticMode; }
-
-    public void enableControl(double target, double tolerance) {
-        this.controlTarget = target;
-        this.controlTolerance = tolerance;
-        this.controlEnabled = true;
-        setStatus("ControlEnabled");
-    }
-
-    public void disableControl() {
-        this.controlEnabled = false;
-        setStatus("ControlDisabled");
-    }
-
-    public boolean isControlEnabled() { return controlEnabled; }
-    public double getControlTarget() { return controlTarget; }
-    public double getControlTolerance() { return controlTolerance; }
-
     // -----------------------
     // Interval -> increment mapping (single place)
     // -----------------------
@@ -165,8 +121,6 @@ public abstract class Sensor {
     protected abstract double getBaselineIncrement();
     protected double getBaselineCooling() { return 0.5; }
     protected void onIntervalUpdated(int intervalMs) { /* optional override */ }
-    protected void onStart() { /* optional override */ }
-    protected void onStop() { /* optional override */ }
 
     // -----------------------
     // Shared helpers

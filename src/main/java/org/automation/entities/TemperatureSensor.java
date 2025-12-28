@@ -21,12 +21,9 @@ public class TemperatureSensor extends Sensor implements ClockObserver {
 
     private double targetTemperature;
     private double temperatureTolerance;
-    private boolean temperatureControlEnabled;
 
     private final double startThreshold;
     private LocalDateTime lastActionTime;
-
-    private SimulationClock simulationClock;
 
     public TemperatureSensor(String sensorType, String location, String status,
                              double startThreshold, double temperatureTolerance,
@@ -37,9 +34,7 @@ public class TemperatureSensor extends Sensor implements ClockObserver {
         this.targetTemperature = targetTemperature;
         this.temperatureUnit = temperatureUnit;
         this.currentTemperature = startThreshold;
-        // initialize control target/tolerance in base
-        this.controlTarget = targetTemperature;
-        this.controlTolerance = temperatureTolerance;
+        // initialize local targets only
     }
 
     /**
@@ -54,8 +49,7 @@ public class TemperatureSensor extends Sensor implements ClockObserver {
         this.targetTemperature = targetTemperature;
         this.temperatureUnit = temperatureUnit;
         this.currentTemperature = startThreshold;
-        this.controlTarget = targetTemperature;
-        this.controlTolerance = temperatureTolerance;
+        // initialize local targets only
     }
 
     public TemperatureSensor(String sensorType, int location, String status,
@@ -71,50 +65,16 @@ public class TemperatureSensor extends Sensor implements ClockObserver {
     protected double getBaselineCooling() { return 0.25; }
 
     @Override
-    protected void onStart() {
-        this.simulationClock = SimulationClock.getInstance();
-        this.simulationClock.register(this);
-        // initialize increments based on current clock interval so first cycle is aligned
-        try { setSimulationInterval(this.simulationClock.getTickIntervalMs()); } catch (Exception ignored) {}
-        calibrateSensor();
-        activateSensor();
-        lastActionTime = null;
-        // sync subclass target with base control fields
-        this.controlTarget = this.targetTemperature;
-        this.controlTolerance = this.temperatureTolerance;
-        enableTemperatureControl(this.targetTemperature, this.temperatureTolerance);
-        updateValue(0);
-        setStatus("Active");
-        System.out.println("🌡️ TemperatureSensor " + getSensorId() + " started at " + currentTemperature + temperatureUnit);
-    }
-
-    @Override
-    protected void onStop() {
-        try { simulationClock.unregister(this); } catch (Exception ignored) {}
-        deactivateSensor();
-        temperatureControlEnabled = false;
-        lastActionTime = null;
-        calibrated = false;
-       updateValue(0);
-        setStatus("Stopped");
-        System.out.println("🛑 TemperatureSensor " + getSensorId() + " stopped at " + currentTemperature + temperatureUnit);
-    }
-
-    @Override
     public void onTick(LocalDateTime currentTime) {
         synchronized (this) {
             if (!isActive()) return;
-            if (!automaticMode) return; // gate automatic behavior
+
             if (lastActionTime == null || currentTime.minusSeconds(1).isAfter(lastActionTime)) {
                 try {
                     int intervalMs = SimulationClock.getInstance().getTickIntervalMs();
                     setSimulationInterval(intervalMs);
-                    if (controlEnabled && temperatureControlEnabled) {
-                        performCycle();
-                    } else {
-                        // passive behavior: small drift or no-op; here we apply primaryIncrement as passive growth
-                        updateValue(primaryIncrement);
-                    }
+                    // Always run cycle; automatic mode removed
+                    performCycle();
                 } catch (Exception e) {
                     sendAlert(currentTemperature + calibrationOffset);
                     setStatus("Error");
@@ -178,14 +138,12 @@ public class TemperatureSensor extends Sensor implements ClockObserver {
     @Override
     public String getSensorInfo() {
         return String.format(
-                "TemperatureSensor[ID=%d, Type=%s, Location=%s, Status=%s, Current=%.2f%s, Start=%.2f%s, Target=%.2f%s, Tolerance=%.2f%s, Control=%s, Auto=%s]",
-                getSensorId(), getSensorType(), getLocation(), getStatus(),
-                currentTemperature, temperatureUnit,
-                startThreshold, temperatureUnit,
-                targetTemperature, temperatureUnit,
-                temperatureTolerance, temperatureUnit,
-                temperatureControlEnabled ? "Enabled" : "Disabled",
-                automaticMode ? "On" : "Off"
+            "TemperatureSensor[ID=%d, Type=%s, Location=%s, Status=%s, Current=%.2f%s, Start=%.2f%s, Target=%.2f%s, Tolerance=%.2f%s]",
+            getSensorId(), getSensorType(), getLocation(), getStatus(),
+            currentTemperature, temperatureUnit,
+            startThreshold, temperatureUnit,
+            targetTemperature, temperatureUnit,
+            temperatureTolerance, temperatureUnit
         );
     }
 
@@ -194,28 +152,11 @@ public class TemperatureSensor extends Sensor implements ClockObserver {
     // -----------------------
     public double simulateTemperature(double change) {
         currentTemperature += change;
-        if (currentTemperature > targetTemperature) currentTemperature = targetTemperature;
-        if (currentTemperature < startThreshold) currentTemperature = startThreshold;
         setCurrentValue(currentTemperature);
         return currentTemperature;
     }
 
-    public void enableTemperatureControl(double targetTemp, double tolerance) {
-        this.targetTemperature = targetTemp;
-        this.temperatureTolerance = tolerance;
-        this.temperatureControlEnabled = true;
-        // sync base control fields
-        enableControl(targetTemp, tolerance);
-    }
-
-    public void disableTemperatureControl() {
-        this.temperatureControlEnabled = false;
-        disableControl();
-    }
-
-  public String getTemperatureStatus(double tempToCheck) {
-    if (!temperatureControlEnabled) return "Control Disabled";
-
+public String getTemperatureStatus(double tempToCheck) {
     // Too cold only if below the minimum allowed by start threshold and tolerance
     if (tempToCheck < startThreshold - temperatureTolerance) {
         return "Too Cold";
@@ -256,9 +197,7 @@ private void startCooling() {
 
 @Override
 public void performCycle() {
-    if (!temperatureControlEnabled) return;
-
-    double calibrated = currentTemperature + calibrationOffset;
+   double calibrated = currentTemperature + calibrationOffset;
 
     double lowerLimit = targetTemperature - temperatureTolerance; // heat below this
     double upperLimit = targetTemperature + temperatureTolerance; // cool above this
@@ -282,7 +221,6 @@ public void performCycle() {
     public double getCurrentTemperature() { return currentTemperature; }
     public String getTemperatureUnit() { return temperatureUnit; }
     public double getTargetTemperature() { return targetTemperature; }
-    public boolean isTemperatureControlEnabled() { return temperatureControlEnabled; }
     public double getStartThreshold() { return startThreshold; }
     public double getTemperatureTolerance() { return temperatureTolerance; }
 }

@@ -89,46 +89,6 @@ public class SensorManager {
         return sensors.get(sensorId);
     }
 
-    // -------------------------
-    // Start / Stop a specific sensor
-    // -------------------------
-    public boolean startSensor(int sensorId) {
-        Sensor s = findSensorById(sensorId);
-        if (s == null) return false;
-        if (s.isActive()) return false;
-        try {
-            s.start();
-            return true;
-        } catch (Exception e) {
-            System.err.println("Failed to start sensor " + sensorId + ": " + e.getMessage());
-            return false;
-        }
-    }
-
-    public boolean stopSensor(int sensorId) {
-        Sensor s = findSensorById(sensorId);
-        if (s == null) return false;
-        if (!s.isActive()) return false;
-        try {
-            s.stop();
-            return true;
-        } catch (Exception e) {
-            System.err.println("Failed to stop sensor " + sensorId + ": " + e.getMessage());
-            return false;
-        }
-    }
-
-    // -------------------------
-    // Bulk operations & queries
-    // -------------------------
-    public void startAll() {
-        new ArrayList<>(sensors.values()).forEach(s -> { if (!s.isActive()) s.start(); });
-    }
-
-    public void stopAll() {
-        new ArrayList<>(sensors.values()).forEach(s -> { if (s.isActive()) s.stop(); });
-    }
-
     public List<String> listSensorInfo() {
         List<String> info = new ArrayList<>();
         for (Sensor s : sensors.values()) info.add(s.getSensorInfo());
@@ -140,42 +100,28 @@ public class SensorManager {
         return s == null ? null : s.getSensorInfo();
     }
 
-    // -------------------------
-    // Control / automatic toggles
-    // -------------------------
-    public boolean setSensorAutomaticMode(int sensorId, boolean enabled) {
-        Sensor s = findSensorById(sensorId);
-        if (s == null) return false;
-        if (enabled) s.enableAutomaticMode(); else s.disableAutomaticMode();
-        return true;
+    public void removeAllSensors() {
+        // Clear sensors from the database, then clear in-memory map
+        if (sensorRepo != null) {
+            try {
+                // delete all rows from Sensor table
+                sensorRepo.delete(null, null);
+            } catch (Exception e) {
+                System.err.println("Failed to clear sensors from DB: " + e.getMessage());
+            }
+        }
+        sensors.clear();
     }
 
-    public boolean setSensorControl(int sensorId, boolean enabled, double target, double tolerance) {
-        Sensor s = findSensorById(sensorId);
-        if (s == null) return false;
-        if (enabled) s.enableControl(target, tolerance); else s.disableControl();
-        return true;
-    }
-
-    public boolean setAllAutomaticMode(boolean enabled) {
-        new ArrayList<>(sensors.values()).forEach(s -> { if (enabled) s.enableAutomaticMode(); else s.disableAutomaticMode(); });
-        return true;
-    }
-
-    public boolean setAllControl(boolean enabled, double target, double tolerance) {
-        new ArrayList<>(sensors.values()).forEach(s -> { if (enabled) s.enableControl(target, tolerance); else s.disableControl(); });
-        return true;
-    }
-
-    // -------------------------
-    // Async helpers
-    // -------------------------
-    public void startSensorAsync(int sensorId) {
-        executor.submit(() -> startSensor(sensorId));
-    }
-
-    public void stopSensorAsync(int sensorId) {
-        executor.submit(() -> stopSensor(sensorId));
+    public void updateSensors() {
+        if (sensorRepo == null) return;
+        for (Sensor s : sensors.values()) {
+            try {
+                sensorRepo.save(s);
+            } catch (Exception e) {
+                System.err.println("Failed to persist sensor (ID=" + s.getSensorId() + "): " + e.getMessage());
+            }
+        }
     }
 
     // -------------------------
@@ -183,7 +129,7 @@ public class SensorManager {
     // -------------------------
     public void shutdown(long timeoutSeconds) {
         // stop sensors first
-        stopAll();
+        
         // shutdown executor
         executor.shutdown();
         try {

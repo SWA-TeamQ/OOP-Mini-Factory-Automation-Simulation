@@ -17,14 +17,13 @@ public class WeightSensor extends Sensor implements ClockObserver {
     private double currentWeight;
     private final String weightUnit;
     private double machineCapacity;
-    private boolean weightControlEnabled;
     private double lastWeight;
 
     private double calibrationOffset;
     private boolean calibrated = false;
 
     private volatile LocalDateTime lastActionTime;
-    private SimulationClock simulationClock;
+    // private SimulationClock simulationClock;
 
     public WeightSensor(String sensorType, String location, String status,
                         double initialWeight, double capacity, String weightUnit) {
@@ -33,11 +32,8 @@ public class WeightSensor extends Sensor implements ClockObserver {
         this.lastWeight = initialWeight;
         this.machineCapacity = capacity;
         this.weightUnit = weightUnit;
-        this.weightControlEnabled = true;
-        this.simulationClock = SimulationClock.getInstance();
-        // initialize base control fields
-        this.controlTarget = initialWeight;
-        this.controlTolerance = 0.0;
+        // this.simulationClock = SimulationClock.getInstance();
+        // removed base control initialization
     }
 
     /**
@@ -50,10 +46,8 @@ public class WeightSensor extends Sensor implements ClockObserver {
         this.lastWeight = initialWeight;
         this.machineCapacity = capacity;
         this.weightUnit = weightUnit;
-        this.weightControlEnabled = true;
-        this.simulationClock = SimulationClock.getInstance();
-        this.controlTarget = initialWeight;
-        this.controlTolerance = 0.0;
+        // this.simulationClock = SimulationClock.getInstance();
+            // removed base control initialization
     }
 
     @Override
@@ -62,23 +56,7 @@ public class WeightSensor extends Sensor implements ClockObserver {
     @Override
     protected double getBaselineCooling() { return 0.5; }
 
-    @Override
-    protected void onStart() {
-        simulationClock.register(this);
-        // initialize increments based on current clock interval so first cycle is aligned
-        try { setSimulationInterval(simulationClock.getTickIntervalMs()); } catch (Exception ignored) {}
-        calibrateSensor();
-        updateValue(0);
-        setStatus("Active");
-        System.out.println("⚖️ WeightSensor " + getSensorId() + " started at " + currentWeight + weightUnit);
-    }
-
-    @Override
-    protected void onStop() {
-        try { simulationClock.unregister(this); } catch (Exception ignored) {}
-        setStatus("Stopped");
-        System.out.println("🛑 WeightSensor " + getSensorId() + " stopped at " + currentWeight + weightUnit);
-    }
+    // Removed onStart/onStop lifecycle overrides
 
     @Override
     public void onTick(LocalDateTime currentTime) {
@@ -89,12 +67,8 @@ public class WeightSensor extends Sensor implements ClockObserver {
                 try {
                     int intervalMs = SimulationClock.getInstance().getTickIntervalMs();
                     setSimulationInterval(intervalMs);
-                    if (controlEnabled && weightControlEnabled) {
-                        performCycle();
-                    } else {
-                        // passive automatic addition if desired
-                        updateValue(primaryIncrement);
-                    }
+                    // Simple drift without control logic
+                    performCycle();
                 } catch (IllegalArgumentException e) {
                     sendAlert(getCalibratedWeight());
                     setStatus("Error");
@@ -212,38 +186,20 @@ public class WeightSensor extends Sensor implements ClockObserver {
         }
     }
 
-    // Control wrappers specific to weight
-    public void enableWeightControl(double capacity) {
-        this.machineCapacity = capacity;
-        this.weightControlEnabled = true;
-        enableControl(currentWeight, 0.0);
-    }
-
-    public void disableWeightControl() {
-        this.weightControlEnabled = false;
-        disableControl();
-    }
+    // Removed control enable/disable wrappers
 
     @Override
     public void performCycle() {
-        if (!weightControlEnabled) return;
-        // simple control: try to maintain controlTarget (base) within controlTolerance
+        // passive behavior: attempt small drift towards capacity without control targets
         double calibrated = getCalibratedWeight();
-        if (calibrated < controlTarget - controlTolerance) {
-            // add small increment
-            updateValue(primaryIncrement);
-        } else if (calibrated > controlTarget + controlTolerance) {
-            // remove small amount (if safe)
+        if (calibrated < machineCapacity) {
             try {
-                updateValue(-primaryIncrement);
+                updateValue(primaryIncrement);
             } catch (Exception e) {
-                // if removal would violate safety, raise alert and disable automatic control
-                raiseAlert("Auto-remove failed", e.getMessage());
-                disableAutomaticMode();
-                disableControl();
+                raiseAlert("Auto-adjust failed", e.getMessage());
             }
         } else {
-            setStatus("WithinDeadband");
+            setStatus("WithinCapacity");
         }
     }
 
