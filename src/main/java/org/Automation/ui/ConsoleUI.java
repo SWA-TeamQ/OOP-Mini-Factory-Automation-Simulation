@@ -43,6 +43,7 @@ public class ConsoleUI {
                 controller.stopProduction();
                 System.out.println("Exiting simulation...");
                 running = false;
+                System.exit(0);
             }
             default -> System.out.println("Invalid choice. Try again.");
         }

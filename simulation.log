@@ -1,10 +1,4 @@
-[2025-12-28 23:39:01] [INFO] Starting Mini Factory Simulation Automation...
-[2025-12-28 23:39:01] [INFO] Mini Factory Simulation Automation started successfully.
-[2025-12-28 23:39:09] [INFO] Production started.
-[2025-12-28 23:39:09] [INFO] Item completed: org.Automation.entities.ProductItem@2d6a9952
-[2025-12-28 23:39:09] [INFO] Simulation step processed item: ITEM-1766954349612
-[2025-12-28 23:40:21] [INFO] Item completed: org.Automation.entities.ProductItem@3930015a
-[2025-12-28 23:40:21] [INFO] Simulation step processed item: ITEM-1766954421105
-[2025-12-28 23:40:46] [INFO] Production stopped.
-[2025-12-28 23:41:32] [INFO] Shutting down system...
-[2025-12-28 23:41:32] [INFO] System shutdown complete.
+[2025-12-28 23:56:27] [INFO] Starting Mini Factory Simulation Automation...
+[2025-12-28 23:56:27] [INFO] Mini Factory Simulation Automation started successfully.
+[2025-12-28 23:56:29] [INFO] Shutting down system...
+[2025-12-28 23:56:29] [INFO] System shutdown complete.
