@@ -22,6 +22,7 @@ public class WorkFlowController {
     private  ProductItemRepository productRepo;
     private  ConveyorRepository conveyorRepo;
     private  SensorRepository sensorRepo;
+    private  ItemTrackingEventRepository itemTrackingEventRepo;
     private  EventBus eventBus;
     private  DatabaseManager db;
 
@@ -41,6 +42,7 @@ public class WorkFlowController {
             ProductItemRepository productItemRepository,
             ConveyorRepository conveyorRepository,
             SensorRepository sensorRepository,
+            ItemTrackingEventRepository itemTrackingEventRepository,
             EventBus eventBus,
             DatabaseManager db
     ) {
@@ -50,6 +52,7 @@ public class WorkFlowController {
         this.productRepo = productItemRepository;
         this.conveyorRepo = conveyorRepository;
         this.sensorRepo = sensorRepository;
+        this.itemTrackingEventRepo = itemTrackingEventRepository;
         this.eventBus = eventBus;
         this.db = db;
         subscribeEvents();
@@ -64,6 +67,7 @@ public class WorkFlowController {
             productRepo.ensureTableExists();
             conveyorRepo.ensureTableExists();
             sensorRepo.ensureTableExists();
+            if (itemTrackingEventRepo != null) itemTrackingEventRepo.ensureTableExists();
             Logger.warn("Factory reset complete. All data cleared.");
         }
     }
@@ -74,6 +78,7 @@ public class WorkFlowController {
             ProductItemRepository productRepo,
             ConveyorRepository conveyorRepo,
             SensorRepository sensorRepo,
+            ItemTrackingEventRepository itemTrackingEventRepo,
             EventBus eventBus,
             DatabaseManager db
     ) {
@@ -82,12 +87,13 @@ public class WorkFlowController {
         this.productRepo = productRepo;
         this.conveyorRepo = conveyorRepo;
         this.sensorRepo = sensorRepo;
+        this.itemTrackingEventRepo = itemTrackingEventRepo;
         this.eventBus = eventBus;
         this.db = db;
 
         this.machineService = new MachineService(machineRepo, eventBus);
         this.conveyorService = new ConveyorService(conveyorRepo, eventBus);
-        this.itemTrackingService = new ItemTrackingService(productRepo, eventBus);
+        this.itemTrackingService = new ItemTrackingService(productRepo, itemTrackingEventRepo, eventBus);
         this.sensorService = new SensorService(sensorRepo, eventBus);
 
         this.productionLineService = new ProductionLineService(

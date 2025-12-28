@@ -85,6 +85,7 @@ public class Main {
                 productItemRepository,
                 conveyorRepository,
                 sensorRepository,
+                itemTrackingEventRepository,
                 eventBus,
                 databaseManager
         );
