@@ -3,6 +3,7 @@ package org.Automation.services;
 import org.Automation.entities.*;
 import org.Automation.repositories.*;
 import org.Automation.core.EventBus;
+import org.Automation.core.events.ItemMovedEvent;
 
 import java.util.List;
 
@@ -52,7 +53,7 @@ public class ProductionLineService implements IProductionLineService {
             machine.process(item);
             actuatorService.stopMachine(machine);
 
-            eventBus.publish("item_moved", item);
+            eventBus.publish("item_moved", new ItemMovedEvent(item.getId(), station.getId(), machine.getId()));
         }
 
         itemTrackingService.markCompleted(item);

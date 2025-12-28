@@ -8,6 +8,7 @@ import org.Automation.core.Logger;
 import org.Automation.engine.SimulationClock;
 import org.Automation.engine.SimulationEngine;
 import org.Automation.core.DatabaseManager;
+import org.Automation.repositories.ItemTrackingEventRepository;
 
 import java.util.List;
 
@@ -50,6 +51,7 @@ public class WorkFlowController {
         this.sensorRepo = sensorRepository;
         this.eventBus = eventBus;
         this.db = db;
+        subscribeEvents();
     }
 
     public void resetFactory() {
@@ -83,7 +85,7 @@ public class WorkFlowController {
         this.db = db;
 
         this.actuatorService = new ActuatorService(machineRepo, eventBus);
-        this.itemTrackingService = new ItemTrackingService(productRepo, eventBus);
+        this.itemTrackingService = new ItemTrackingService(productRepo, new ItemTrackingEventRepository(db), eventBus);
         this.sensorService = new SensorService(sensorRepo, eventBus);
 
         this.productionLineService = new ProductionLineService(

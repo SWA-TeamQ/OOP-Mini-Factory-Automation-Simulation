@@ -9,6 +9,7 @@ import org.Automation.engine.SimulationEngine;
 import org.Automation.repositories.*;
 import org.Automation.services.*;
 import org.Automation.ui.ConsoleApp;
+import org.Automation.repositories.ItemTrackingEventRepository;
 
 /**
  * Entry point of the Mini Factory Simulation Automation system.
@@ -59,12 +60,13 @@ public class Main {
         ProductItemRepository productItemRepository = new ProductItemRepository(databaseManager);
         ConveyorRepository conveyorRepository = new ConveyorRepository(databaseManager);
         SensorRepository sensorRepository = new SensorRepository(databaseManager, eventBus);
+        ItemTrackingEventRepository itemTrackingEventRepository = new ItemTrackingEventRepository(databaseManager);
 
         // ==============================
         // 4️⃣ SERVICES (BUSINESS LOGIC)
         // ==============================
         ItemTrackingService itemTrackingService =
-                new ItemTrackingService(productItemRepository, eventBus);
+                new ItemTrackingService(productItemRepository, itemTrackingEventRepository, eventBus);
 
         SensorService sensorService =
                 new SensorService(sensorRepository, eventBus);
@@ -84,19 +86,20 @@ public class Main {
                 );
 
 
-                // ==============================
+        // ==============================
         // 6️⃣ CONTROLLER (ORCHESTRATOR)
         // ==============================
-       // 1. Create controller FIRST
-WorkFlowController controller = new WorkFlowController(
-        machineRepository,
-        stationRepository,
-        productItemRepository,
-        conveyorRepository,
-        sensorRepository,
-        eventBus,
-        databaseManager
-);
+        // Create controller using already-wired services (single source of truth).
+        WorkFlowController controller = new WorkFlowController(
+                productionLineService,
+                stationRepository,
+                machineRepository,
+                productItemRepository,
+                conveyorRepository,
+                sensorRepository,
+                eventBus,
+                databaseManager
+        );
 
 // 2. Create engine USING controller
 SimulationEngine simulationEngine = new SimulationEngine(controller);
