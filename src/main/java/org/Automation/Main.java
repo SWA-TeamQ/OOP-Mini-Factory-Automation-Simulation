@@ -83,33 +83,33 @@ public class Main {
                         eventBus
                 );
 
-        // ==============================
-        // 5️⃣ SIMULATION ENGINE
-        // ==============================
-        SimulationEngine simulationEngine =
-                new SimulationEngine();
 
-        // ==============================
+                // ==============================
         // 6️⃣ CONTROLLER (ORCHESTRATOR)
         // ==============================
-        WorkFlowController workFlowController =
-                new WorkFlowController(
-                        simulationEngine,
-                        productionLineService,
-                        stationRepository,
-                        machineRepository,
-                        productItemRepository,
-                        conveyorRepository,
-                        sensorRepository,
-                        eventBus,
-                        databaseManager
-                );
+       // 1. Create controller FIRST
+WorkFlowController controller = new WorkFlowController(
+        machineRepository,
+        stationRepository,
+        productItemRepository,
+        conveyorRepository,
+        sensorRepository,
+        eventBus,
+        databaseManager
+);
 
+// 2. Create engine USING controller
+SimulationEngine simulationEngine = new SimulationEngine(controller);
+
+// 3. Inject engine back into controller
+controller.setSimulationEngine(simulationEngine);
+
+        
         // ==============================
         // 7️⃣ USER INTERFACE
         // ==============================
         ConsoleApp consoleApp =
-                new ConsoleApp(workFlowController);
+                new ConsoleApp(controller);
 
         // ==============================
         // 8️⃣ SHUTDOWN HOOK
@@ -124,8 +124,9 @@ public class Main {
         // ==============================
         // 9️⃣ START APPLICATION
         // ==============================
-        consoleApp.start();
-
+        
         Logger.info("Mini Factory Simulation Automation started successfully.");
+
+        consoleApp.start();
     }
 }

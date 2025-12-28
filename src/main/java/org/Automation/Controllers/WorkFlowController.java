@@ -30,9 +30,9 @@ public class WorkFlowController {
     private ProductionLineService productionLineService;
     private SimulationEngine simulationEngine;
     private SimulationClock simulationClock;
+    private boolean productionRunning = false;
 
     public WorkFlowController(
-            SimulationEngine simulationEngine,
             ProductionLineService productionLineService,
             StationRepository stationRepository,
             MachineRepository machineRepository,
@@ -42,7 +42,6 @@ public class WorkFlowController {
             EventBus eventBus,
             DatabaseManager db
     ) {
-        this.simulationEngine = simulationEngine;
         this.productionLineService = productionLineService;
         this.stationRepo = stationRepository;
         this.machineRepo = machineRepository;
@@ -166,29 +165,57 @@ public EventBus getEventBus() {
 }
 
 public void startProduction() {
-    if (simulationEngine != null) {
+    if (productionRunning) {
         System.out.println("Production already running.");
         return;
     }
-;
-    simulationEngine = new SimulationEngine();
 
+    productionRunning = true;
     simulationEngine.startSimulation();
-    System.out.println("Production started.");
+    Logger.info("Production started.");
 }
+
+
+
+
 
 /**
  * Stop the simulation.
  */
 public void stopProduction() {
-    if (simulationEngine != null) {
-        simulationEngine.stopSimulation();
-        simulationEngine = null;
-        simulationClock = null;
-        System.out.println("Production stopped.");
-    } else {
+    if (!productionRunning) {
         System.out.println("No production is running.");
+        return;
     }
+
+    simulationEngine.stopSimulation();
+    productionRunning = false;
+
+    Logger.info("Production stopped.");
+}
+
+
+public boolean isProductionRunning() {
+    return productionRunning;
+}
+
+public void runProductionStep() {
+    if (!productionRunning) {
+        return;
+    }
+
+    String id = "ITEM-" + System.currentTimeMillis();
+
+    ProductItem item = new ProductItem(id);
+    productRepo.save(item);
+
+    productionLineService.process(item);
+
+    Logger.info("Simulation step processed item: " + item.getId());
+}
+
+public void setSimulationEngine(SimulationEngine simulationEngine) {
+    this.simulationEngine = simulationEngine;
 }
 
 }
