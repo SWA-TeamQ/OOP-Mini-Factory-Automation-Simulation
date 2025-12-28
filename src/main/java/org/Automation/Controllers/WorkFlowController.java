@@ -24,7 +24,8 @@ public class WorkFlowController {
     private  EventBus eventBus;
     private  DatabaseManager db;
 
-    private ActuatorService actuatorService;
+    private IMachineService machineService;
+    private IConveyorService conveyorService;
     private ItemTrackingService itemTrackingService;
     private SensorService sensorService;
     private ProductionLineService productionLineService;
@@ -82,7 +83,8 @@ public class WorkFlowController {
         this.eventBus = eventBus;
         this.db = db;
 
-        this.actuatorService = new ActuatorService(machineRepo, eventBus);
+        this.machineService = new MachineService(machineRepo, eventBus);
+        this.conveyorService = new ConveyorService(conveyorRepo, eventBus);
         this.itemTrackingService = new ItemTrackingService(productRepo, eventBus);
         this.sensorService = new SensorService(sensorRepo, eventBus);
 
@@ -92,7 +94,8 @@ public class WorkFlowController {
                 conveyorRepo,
                 itemTrackingService,
                 sensorService,
-                actuatorService,
+                machineService,
+                conveyorService,
                 eventBus
         );
 

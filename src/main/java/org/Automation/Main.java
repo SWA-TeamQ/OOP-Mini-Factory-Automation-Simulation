@@ -4,7 +4,6 @@ import org.Automation.Controllers.WorkFlowController;
 import org.Automation.core.DatabaseManager;
 import org.Automation.core.EventBus;
 import org.Automation.core.Logger;
-import org.Automation.engine.SimulationClock;
 import org.Automation.engine.SimulationEngine;
 import org.Automation.repositories.*;
 import org.Automation.services.*;
@@ -12,14 +11,7 @@ import org.Automation.ui.ConsoleApp;
 
 /**
  * Entry point of the Mini Factory Simulation Automation system.
- * 
- * This class is responsible for:
- *  - Bootstrapping core infrastructure
- *  - Wiring dependencies manually (no framework)
- *  - Starting the UI
- *  - Graceful shutdown
  */
-
 public class Main {
 
     public static void main(String[] args) {
@@ -40,15 +32,7 @@ public class Main {
         // Fresh Start Check
         if (args.length > 0 && args[0].equalsIgnoreCase("--fresh")) {
             Logger.warn("Fresh start requested. Clearing database...");
-            try (java.sql.Statement stmt = databaseManager.getConnection().createStatement()) {
-                stmt.execute("DROP TABLE IF EXISTS Station");
-                stmt.execute("DROP TABLE IF EXISTS Machine");
-                stmt.execute("DROP TABLE IF EXISTS ProductItem");
-                stmt.execute("DROP TABLE IF EXISTS Sensor");
-                stmt.execute("DROP TABLE IF EXISTS ConveyorBelt");
-            } catch (java.sql.SQLException e) {
-                Logger.error("Failed to clear database: " + e.getMessage());
-            }
+            databaseManager.clearDatabase();
         }
 
         // ==============================
@@ -69,8 +53,11 @@ public class Main {
         SensorService sensorService =
                 new SensorService(sensorRepository, eventBus);
 
-        ActuatorService actuatorService =
-                new ActuatorService(machineRepository, eventBus);
+        IMachineService machineService =
+                new MachineService(machineRepository, eventBus);
+
+        IConveyorService conveyorService =
+                new ConveyorService(conveyorRepository, eventBus);
 
         ProductionLineService productionLineService =
                 new ProductionLineService(
@@ -79,7 +66,8 @@ public class Main {
                         conveyorRepository,
                         itemTrackingService,
                         sensorService,
-                        actuatorService,
+                        machineService,
+                        conveyorService,
                         eventBus
                 );
 

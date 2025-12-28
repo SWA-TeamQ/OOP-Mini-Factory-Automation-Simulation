@@ -11,14 +11,12 @@ public class Machine {
     private final String id;
     private final MachineType type;
     private MachineStatus status;
-    private final Actuator actuator;
     private final EventBus eventBus;
     private final Random random = new Random();
 
-    public Machine(String id, MachineType type, Actuator actuator, EventBus eventBus) {
+    public Machine(String id, MachineType type, EventBus eventBus) {
         this.id = id;
         this.type = type;
-        this.actuator = actuator;
         this.eventBus = eventBus;
         this.status = MachineStatus.IDLE;
     }
@@ -27,7 +25,6 @@ public class Machine {
     public MachineType getType() { return type; }
     public MachineStatus getStatus() { return status; }
     public void setStatus(MachineStatus status) { this.status = status; }
-    public Actuator getActuator() { return actuator; }
 
     public void start() { if (status != MachineStatus.ERROR) status = MachineStatus.RUNNING; }
     public void stop() { if (status != MachineStatus.ERROR) status = MachineStatus.STOPPED; }

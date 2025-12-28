@@ -24,7 +24,7 @@ public class EntityFactory {
 
     public static Machine createMachine(String type, String id, String name, String status, EventBus eventBus) {
         MachineType machineType = MachineType.valueOf(type.toUpperCase());
-        Machine machine = new Machine(id, machineType, new Actuator(), eventBus);
+        Machine machine = new Machine(id, machineType, eventBus);
         if (status != null) {
             machine.setStatus(MachineStatus.valueOf(status.toUpperCase()));
         }

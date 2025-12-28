@@ -12,7 +12,8 @@ public class ProductionLineService implements IProductionLineService {
     private final ConveyorRepository conveyorRepo;
     private final ItemTrackingService itemTrackingService;
     private final SensorService sensorService;
-    private final ActuatorService actuatorService;
+    private final IMachineService machineService;
+    private final IConveyorService conveyorService;
     private final EventBus eventBus;
     private ProductItemRepository productRepo;
 
@@ -22,7 +23,8 @@ public class ProductionLineService implements IProductionLineService {
             ConveyorRepository conveyorRepo,
             ItemTrackingService itemTrackingService,
             SensorService sensorService,
-            ActuatorService actuatorService,
+            IMachineService machineService,
+            IConveyorService conveyorService,
             EventBus eventBus
     ) {
         this.stationRepo = stationRepo;
@@ -30,27 +32,31 @@ public class ProductionLineService implements IProductionLineService {
         this.conveyorRepo = conveyorRepo;
         this.itemTrackingService = itemTrackingService;
         this.sensorService = sensorService;
-        this.actuatorService = actuatorService;
+        this.machineService = machineService;
+        this.conveyorService = conveyorService;
         this.eventBus = eventBus;
     }
+
     public void startProductionCycle() {
-        // For simplicity, iterate over all items in productRepo (you may extend as needed)
         productRepo.findAll().forEach(this::process);
     }
+
     @Override
     public void process(ProductItem item) {
         itemTrackingService.registerItem(item);
 
-        List<Station> stations = (List<Station>) stationRepo.findAll();
+        List<Station> stations = stationRepo.findAll();
 
         for (Station station : stations) {
             Machine machine = station.getMachine();
             Sensor sensor = station.getSensor();
 
-            actuatorService.startMachine(machine);
-            sensorService.readSensor(sensor);
-            machine.process(item);
-            actuatorService.stopMachine(machine);
+            if (machine != null) {
+                machineService.startMachine(machine.getId());
+                sensorService.readSensor(sensor);
+                machineService.processItem(machine.getId(), item);
+                machineService.stopMachine(machine.getId());
+            }
 
             eventBus.publish("item_moved", item);
         }
