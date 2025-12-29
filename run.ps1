@@ -36,4 +36,4 @@ if ($LASTEXITCODE -ne 0) {
 
 # 4. Run the project
 Write-Host "Starting Application..." -ForegroundColor Green
-java -cp "$classpath" org.Automation.Main $args
+java -cp "$classpath" org.automation.Main $args

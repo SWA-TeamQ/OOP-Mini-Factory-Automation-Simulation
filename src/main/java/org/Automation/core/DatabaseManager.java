@@ -5,7 +5,7 @@ import java.sql.*;
 public final class DatabaseManager {
 
   private Connection connection;
-  private final String url = "jdbc:sqlite:automation.sqlite";
+  private final String url = "jdbc:sqlite:data/automation.sqlite";
 
   public boolean connect() {
     if (connection != null)

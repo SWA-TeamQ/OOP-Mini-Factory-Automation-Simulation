@@ -30,11 +30,10 @@ public class EntityFactory {
         type = type.toUpperCase();
 
         MachineType machineType = MachineType.valueOf(type);
-        Machine machine;
+            Machine machine;
 
         switch (machineType){
             case INPUT:
-                machine = new InputMachine();
                 break;
 
             case PROCESSING:
@@ -44,7 +43,7 @@ public class EntityFactory {
                 break;
         }
 
-        Machine machine = (machineType == MachineType.PACKAGING) ? new PackagingMachine(id)
+        machine = (machineType == MachineType.PACKAGING) ? new PackagingMachine(id)
                 : new Machine(id, machineType);
 
         if (status != null) {

@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter;
  */
 public class Logger {
 
-    private static final String LOG_FILE = "simulation.log";
+    private static final String LOG_FILE = "logs/simulation.log";
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static void info(String message) {
