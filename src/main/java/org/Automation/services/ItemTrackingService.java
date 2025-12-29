@@ -4,7 +4,13 @@ import org.Automation.entities.*;
 import org.Automation.events.*;
 import org.Automation.repositories.*;
 import org.Automation.core.*;
+import org.Automation.engine.SimulationClock;
 
+/**
+ * Tracks product items through the production line.
+ * Listens to ProductArrivedEvent and ProductFinishedEvent.
+ * Manages lifecycle data (startTick, endTick) in the database.
+ */
 public class ItemTrackingService implements IItemTrackingService {
 
     private final ProductItemRepository productRepo;
@@ -14,38 +20,82 @@ public class ItemTrackingService implements IItemTrackingService {
         this.productRepo = productRepo;
         this.eventBus = eventBus;
 
-        // Subscribe once: whenever ProductionLineService publishes item_moved, we
-        // update memory state.
-        this.eventBus.subscribe("item_moved", new EventSubscriber() {
+        subscribeToEvents();
+    }
+
+    private void subscribeToEvents() {
+        // Listen for product arrivals to track movements
+        eventBus.subscribe("ProductArrivedEvent", new EventSubscriber() {
             @Override
-            public void onEvent(Event payload) {
-                if (payload instanceof ItemMovedEvent moved) {
-                    onItemMoved(moved);
+            public void onEvent(Event event) {
+                if (event instanceof ProductArrivedEvent arrivedEvent) {
+                    onProductArrived(arrivedEvent);
+                }
+            }
+        });
+
+        // Listen for product finished to update completion data
+        eventBus.subscribe("ProductFinishedEvent", new EventSubscriber() {
+            @Override
+            public void onEvent(Event event) {
+                if (event instanceof ProductFinishedEvent finishedEvent) {
+                    onProductFinished(finishedEvent);
                 }
             }
         });
     }
 
+    /**
+     * Registers a new item and sets its start tick.
+     * Called when an item first enters the production line.
+     */
     @Override
     public void registerItem(ProductItem item) {
+        long currentTick = SimulationClock.getInstance().getLogicalTick();
+        item.setStartTick(currentTick);
         productRepo.save(item);
-        eventBus.publish(new ItemRegisteredEvent(item.getId()));
+        Logger.info("Item " + item.getId() + " registered at tick " + currentTick);
     }
 
+    /**
+     * Marks an item as completed, sets end tick and saves to DB.
+     */
     @Override
     public void markCompleted(ProductItem item) {
+        long currentTick = SimulationClock.getInstance().getLogicalTick();
+        item.setEndTick(currentTick);
         item.setCompleted(true);
         productRepo.save(item);
-        eventBus.publish(new ItemCompletedEvent(item.getId()));
+
+        // Publish the finished event
+        eventBus.publish(new ProductFinishedEvent(
+                item.getId(),
+                currentTick,
+                item.getTotalDuration()));
+
+        Logger.info("Item " + item.getId() + " completed. Duration: " + item.getTotalDuration() + " ticks");
     }
 
-    private void onItemMoved(ItemMovedEvent moved) {
-        // Optional: keep an in-memory history too (not persisted in ProductItem table
-        // in this schema)
-        ProductItem item = productRepo.findById(moved.getItemId());
+    /**
+     * Marks an item as defective (for machine failure scenarios).
+     */
+    public void markDefective(ProductItem item) {
+        item.setDefective(true);
+        item.setEndTick(SimulationClock.getInstance().getLogicalTick());
+        productRepo.save(item);
+        Logger.error("Item " + item.getId() + " marked as DEFECTIVE");
+    }
+
+    private void onProductArrived(ProductArrivedEvent event) {
+        ProductItem item = productRepo.findById(event.getProductId());
         if (item != null) {
-            item.addHistory("Moved to station " + moved.getStationId() + " via machine " + moved.getMachineId()
-                    + " at " + moved.getTimestamp());
+            item.addHistory("Arrived at station " + event.getStationId() + " at tick " + event.getTickTimestamp());
+            Logger.info("Tracking: Item " + event.getProductId() + " arrived at " + event.getStationId());
         }
+    }
+
+    private void onProductFinished(ProductFinishedEvent event) {
+        Logger.info("Tracking: Item " + event.getProductId() + " finished. Total duration: " + event.getTotalDuration()
+                + " ticks");
     }
 }

@@ -22,10 +22,10 @@ public class EntityFactory {
         return station;
     }
 
-    public static Machine createMachine(String type, String id, String name, String status, EventBus eventBus) {
+    public static Machine createMachine(String type, String id, String name, String status) {
         MachineType machineType = MachineType.valueOf(type.toUpperCase());
-        Machine machine = (machineType == MachineType.PACKAGING) ? new PackagingMachine(id, eventBus)
-                : new Machine(id, machineType, eventBus);
+        Machine machine = (machineType == MachineType.PACKAGING) ? new PackagingMachine(id)
+                : new Machine(id, machineType);
 
         if (status != null) {
             machine.setStatus(MachineStatus.valueOf(status.toUpperCase()));
@@ -37,22 +37,18 @@ public class EntityFactory {
         return new ProductItem(id);
     }
 
-    public static Sensor createSensor(String id, String locationId, String type, double threshold, int samplingRate,
+    public static Sensor createSensor(String id, String locationId, String type, double threshold,
             EventBus eventBus) {
         if ("Temperature".equalsIgnoreCase(type)) {
-            return new TemperatureSensor(id, locationId, threshold, samplingRate, eventBus);
+            return new TemperatureSensor(id, locationId, threshold, eventBus);
         } else if ("Weight".equalsIgnoreCase(type)) {
-            return new WeightSensor(id, locationId, threshold, samplingRate, eventBus);
+            return new WeightSensor(id, locationId, threshold, eventBus);
         } else {
-            // Default fallback if type is unknown, but since Sensor is abstract we must
-            // pick one or throw error
-            // For safety in this prompt context, defaulting to Temperature or throwing
-            // exception
             throw new IllegalArgumentException("Unknown sensor type: " + type);
         }
     }
 
-    public static ConveyorBelt createConveyor(String id, int capacity, int duration, EventBus eventBus) {
-        return new ConveyorBelt(id, capacity, duration, eventBus);
+    public static ConveyorBelt createConveyor(String id, int capacity, int duration) {
+        return new ConveyorBelt(id, capacity, duration);
     }
 }

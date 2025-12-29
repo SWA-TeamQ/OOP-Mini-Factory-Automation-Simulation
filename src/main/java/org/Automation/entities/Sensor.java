@@ -1,15 +1,15 @@
 package org.Automation.entities;
 
-import org.Automation.core.*;
-import org.Automation.engine.*;
-import org.Automation.engine.*;
-import org.Automation.events.*;
+import org.Automation.core.EventBus;
+import org.Automation.engine.SimulationClock;
+import org.Automation.engine.Tickable;
 
 import java.util.Random;
 
 /**
  * Represents a physical sensor monitoring the production line.
- * Samples values based on the SimulationClock (Time-Driven).
+ * Polls every tick during processing stage.
+ * Only raises events when threshold is exceeded.
  */
 public abstract class Sensor implements Tickable {
     protected final String id;
@@ -19,43 +19,54 @@ public abstract class Sensor implements Tickable {
     protected final Random random = new Random();
 
     protected double threshold;
-    protected int samplingRateTicks;
     protected double lastValue;
 
-    public Sensor(String id, String locationId, String type, double threshold, int samplingRateTicks,
-            EventBus eventBus) {
+    // The product currently being measured (set during processing)
+    protected String currentProductId;
+
+    public Sensor(String id, String locationId, String type, double threshold, EventBus eventBus) {
         this.id = id;
         this.locationId = locationId;
         this.type = type;
         this.threshold = threshold;
-        this.samplingRateTicks = samplingRateTicks;
         this.eventBus = eventBus;
+        this.currentProductId = null;
 
         SimulationClock.getInstance().registerTickable(this);
-        subscribeToEvents();
     }
 
-    // Abstract methods defining the sensor contract (from old implementation)
-    public abstract void readValue();
-
-    public abstract void updateValue(Object value);
-
-    public abstract void validateReading();
-
-    public abstract String getSensorInfo();
-
-    protected void subscribeToEvents() {
-        // Sensors should listen for general sensor-related commands if applicable
-        // Concrete classes will override or extend this logic.
+    /**
+     * Sets the current product being measured.
+     * Called when a product starts processing at this sensor's location.
+     */
+    public void setCurrentProduct(String productId) {
+        this.currentProductId = productId;
     }
 
+    /**
+     * Clears the current product (processing finished).
+     */
+    public void clearCurrentProduct() {
+        this.currentProductId = null;
+    }
+
+    /**
+     * Samples and validates every tick if a product is being processed.
+     */
     @Override
     public void tick(long currentTick) {
-        if (currentTick % samplingRateTicks == 0) {
+        if (currentProductId != null) {
             readValue();
             validateReading();
         }
     }
+
+    // Abstract methods to be implemented by specific sensor types
+    public abstract void readValue();
+
+    public abstract void validateReading();
+
+    public abstract String getSensorInfo();
 
     public String getId() {
         return id;
@@ -77,7 +88,7 @@ public abstract class Sensor implements Tickable {
         return threshold;
     }
 
-    public int getSamplingRateTicks() {
-        return samplingRateTicks;
+    public String getCurrentProductId() {
+        return currentProductId;
     }
 }

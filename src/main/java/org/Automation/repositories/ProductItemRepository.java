@@ -1,11 +1,14 @@
 package org.Automation.repositories;
 
 import org.Automation.core.DatabaseManager;
-import org.Automation.core.EntityFactory;
 import org.Automation.entities.ProductItem;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Repository for ProductItem entities.
+ * Stores lifecycle data: startTick, endTick, totalDuration, defective status.
+ */
 public class ProductItemRepository extends Repository<ProductItem> {
 
     public ProductItemRepository(DatabaseManager db) {
@@ -17,7 +20,11 @@ public class ProductItemRepository extends Repository<ProductItem> {
         return """
                 CREATE TABLE IF NOT EXISTS ProductItem (
                     id TEXT PRIMARY KEY,
-                    completed INTEGER DEFAULT 0
+                    completed INTEGER DEFAULT 0,
+                    defective INTEGER DEFAULT 0,
+                    startTick INTEGER DEFAULT 0,
+                    endTick INTEGER DEFAULT 0,
+                    totalDuration INTEGER DEFAULT 0
                 );
                 """;
     }
@@ -26,30 +33,27 @@ public class ProductItemRepository extends Repository<ProductItem> {
     protected ProductItem mapRow(ResultSet rs) throws SQLException {
         ProductItem item = new ProductItem(rs.getString("id"));
         item.setCompleted(rs.getInt("completed") == 1);
+        item.setDefective(rs.getInt("defective") == 1);
+        item.setStartTick(rs.getLong("startTick"));
+        item.setEndTick(rs.getLong("endTick"));
         return item;
     }
 
     @Override
     public void save(ProductItem item) {
-        // Upsert behavior: update if exists, otherwise insert.
-        boolean updated = db.update(
-                tableName,
-                "completed=?",
-                "id=?",
-                new Object[]{item.isCompleted() ? 1 : 0, item.getId()}
-        );
-
-        if (!updated) {
-            String[] columns = {"id", "completed"};
-            Object[] values = {
-                    item.getId(),
-                    item.isCompleted() ? 1 : 0
-            };
-            db.insert(tableName, columns, values);
-        }
+        String[] columns = { "id", "completed", "defective", "startTick", "endTick", "totalDuration" };
+        Object[] values = {
+                item.getId(),
+                item.isCompleted() ? 1 : 0,
+                item.isDefective() ? 1 : 0,
+                item.getStartTick(),
+                item.getEndTick(),
+                item.getTotalDuration()
+        };
+        db.insert(tableName, columns, values);
     }
 
     public void delete(String id) {
-        db.delete(tableName, "id=?", new Object[]{id});
+        db.delete(tableName, "id=?", new Object[] { id });
     }
 }

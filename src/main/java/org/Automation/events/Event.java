@@ -2,14 +2,16 @@ package org.Automation.events;
 
 import org.Automation.engine.SimulationClock;
 
+/**
+ * Base class for all events in the system.
+ * Contains type identifier and timestamp.
+ */
 public abstract class Event {
     private final String type;
     private final long tickTimestamp;
-    private final Object source;
 
-    public Event(String type, Object source) {
+    public Event(String type) {
         this.type = type;
-        this.source = source;
         this.tickTimestamp = SimulationClock.getInstance().getLogicalTick();
     }
 
@@ -19,9 +21,5 @@ public abstract class Event {
 
     public long getTickTimestamp() {
         return tickTimestamp;
-    }
-
-    public Object getSource() {
-        return source;
     }
 }

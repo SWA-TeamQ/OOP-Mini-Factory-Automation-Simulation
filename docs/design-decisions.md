@@ -10,17 +10,42 @@
 - **Rationale**: Ensures all components are synchronized. If the conveyor moves at tick 100, the machine at the end must also be at tick 100 to receive it.
 - **Alternative**: Distributed clocks per station. Rejected due to complexity in synchronization and "drift" issues.
 
-## 3. Hybrid Event-Driven Communication
-- **Decision**: Use an `EventBus` for control logic.
-- **Rationale**: Decouples the "routing" logic from the hardware. The machine doesn't care where the item goes next; it only cares that it finished its own job. This makes the system extremely flexible (e.g., we can change the factory floor layout in the DB without touching the `Machine` class code).
-- **Alternative**: Direct Method Calls. Rejected because it creates "Spaghetti Code" where every component needs a reference to every other component.
+## 3. Typed Event Classes vs. String Topics
+- **Decision**: Use strongly-typed `Event` classes with a hierarchy.
+- **Rationale**: 
+  - **Type Safety**: The compiler catches errors if a subscriber expects a specific event type.
+  - **Self-Documentation**: Each event class clearly defines its payload via getters.
+  - **IDE Support**: Auto-complete, refactoring, and "Find Usages" work correctly.
+  - **Metadata**: The base `Event` class includes `tickTimestamp` and `source` for debugging and auditing.
+- **Alternative**: String topics with `Object` payloads. Rejected because it requires runtime `instanceof` checks everywhere and is error-prone.
 
-## 4. Station Orchestration vs. Machine Autonomy
+## 4. Abstract Sensor with Specialized Subclasses
+- **Decision**: `Sensor` is abstract; concrete types like `TemperatureSensor` and `WeightSensor` implement behavior.
+- **Rationale**: 
+  - Different sensors have different reading logic (temperature vs. weight simulation).
+  - Different sensors publish different event types (`TemperatureReadingEvent` vs. `WeightReadingEvent`).
+  - New sensor types can be added without modifying existing code.
+- **Alternative**: Single `Sensor` class with a `sensorType` field and switch statements. Rejected due to OCP (Open-Closed Principle) violations.
+
+## 5. FIFO Queue in Station
+- **Decision**: Stations use a `waitingQueue` (FIFO) for items awaiting processing.
+- **Rationale**: Provides predictable, fair ordering – first-come-first-served. When a machine becomes available, the oldest waiting item is processed first.
+- **Alternative**: List-based storage with manual selection. Rejected because it doesn't enforce ordering semantics.
+
+## 6. Station Orchestration vs. Machine Autonomy
 - **Decision**: Stations orchestrate machines.
 - **Rationale**: An industrial station usually has local logic (e.g., "If Machine A is busy, try Machine B"). Keeping this logic in the `Station` class prevents the `ProductionLineService` from becoming a "God Object."
 - **Alternative**: Machines pick their own items. Rejected because machines shouldn't have visibility into the station's input queue.
 
-## 5. Repository Pattern & SQLite
+## 7. Repository Pattern & SQLite
 - **Decision**: Persistence layer using Repositories.
 - **Rationale**: Allows the simulation to be "restarted" or audited. Even if the application crashes, the state of the product items and machine history is preserved.
 - **Alternative**: In-memory Lists. Rejected because it lacks professional-grade auditability and durability.
+
+## 8. Service Layer with Interfaces
+- **Decision**: Services implement interfaces (`IMachineService`, `IConveyorService`, etc.).
+- **Rationale**: 
+  - Enables dependency injection and testability.
+  - High-level components depend on abstractions, not concrete implementations.
+  - Allows for mock implementations in testing.
+- **Alternative**: Direct instantiation of services. Rejected due to tight coupling.
