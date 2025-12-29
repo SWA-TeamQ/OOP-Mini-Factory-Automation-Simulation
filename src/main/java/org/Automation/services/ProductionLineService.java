@@ -1,6 +1,7 @@
 package org.Automation.services;
 
 import org.Automation.entities.*;
+import org.Automation.entities.enums.StationType;
 import org.Automation.repositories.*;
 import org.Automation.core.EventBus;
 import org.Automation.core.Logger;
@@ -106,6 +107,13 @@ public class ProductionLineService implements IProductionLineService {
 
             firstStation.onProductArrived(item);
             Logger.info("Item " + item.getId() + " entered the production line at " + firstStation.getId());
+
+            // Strict Refactor: If InputStation (or station with no machines), move item
+            // immediately.
+            // Previously might have relied on ProductReadyForTransferEvent or similar.
+            if (firstStation.getType() == StationType.INPUT || firstStation.getMachines().isEmpty()) {
+                handleTransfer(item);
+            }
         }
     }
 

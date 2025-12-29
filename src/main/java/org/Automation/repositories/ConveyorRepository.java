@@ -8,11 +8,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class ConveyorRepository extends Repository<ConveyorBelt> {
-    private final EventBus eventBus;
 
     public ConveyorRepository(DatabaseManager db, EventBus eventBus) {
         super("ConveyorBelt", db);
-        this.eventBus = eventBus;
+        // eventBus unused
     }
 
     @Override
@@ -29,25 +28,23 @@ public class ConveyorRepository extends Repository<ConveyorBelt> {
     @Override
     protected ConveyorBelt mapRow(ResultSet rs) throws SQLException {
         return EntityFactory.createConveyor(
-            rs.getString("id"),
-            rs.getInt("capacity"),
-            rs.getInt("duration"),
-            eventBus
-        );
+                rs.getString("id"),
+                rs.getInt("capacity"),
+                rs.getInt("duration"));
     }
 
     @Override
     public void save(ConveyorBelt conveyor) {
-        String[] columns = {"id", "capacity", "duration"};
+        String[] columns = { "id", "capacity", "duration" };
         Object[] values = {
-            conveyor.getId(),
-            conveyor.getCapacity(),
-            conveyor.getTransferDurationTicks()
+                conveyor.getId(),
+                conveyor.getCapacity(),
+                conveyor.getTransferDurationTicks()
         };
         db.insert(tableName, columns, values);
     }
 
     public void delete(String id) {
-        db.delete(tableName, "id=?", new Object[]{id});
+        db.delete(tableName, "id=?", new Object[] { id });
     }
 }

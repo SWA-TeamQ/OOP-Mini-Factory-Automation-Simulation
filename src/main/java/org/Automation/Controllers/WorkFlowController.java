@@ -101,30 +101,25 @@ public class WorkFlowController {
     }
 
     private void subscribeEvents() {
-        eventBus.subscribe("MachineErrorEvent", new EventSubscriber() {
+        // Strict Refactor: Only allowed events.
+        eventBus.subscribe("ProductFinishedEvent", new EventSubscriber() {
             @Override
             public void onEvent(Event event) {
-                Logger.error("Machine error: " + event.getSource());
+                if (event instanceof ProductFinishedEvent finishedEvent) {
+                    Logger.info("Controller: Product completed: " + finishedEvent.getProductId() +
+                            " Duration: " + finishedEvent.getTotalDuration());
+                }
             }
         });
-        eventBus.subscribe("MachineStartedEvent", new EventSubscriber() {
+
+        eventBus.subscribe("ProductArrivedEvent", new EventSubscriber() {
             @Override
             public void onEvent(Event event) {
-                Logger.info("Machine started: " + event.getSource());
+                // Optional: Log arrival
             }
         });
-        eventBus.subscribe("MachineStoppedEvent", new EventSubscriber() {
-            @Override
-            public void onEvent(Event event) {
-                Logger.info("Machine stopped: " + event.getSource());
-            }
-        });
-        eventBus.subscribe("ItemCompletedEvent", new EventSubscriber() {
-            @Override
-            public void onEvent(Event event) {
-                Logger.info("Item completed: " + event.getSource());
-            }
-        });
+
+        // Machine failures and starts are no longer events.
     }
 
     private void seedDataIfEmpty() {
@@ -137,16 +132,16 @@ public class WorkFlowController {
             Station pack = EntityFactory.createStation("PACKAGING", "ST-03", "ACTIVE", eventBus);
 
             // 2. Create Machines
-            Machine m1 = EntityFactory.createMachine("PROCESSING", "M-01", "Drill Press", "IDLE", eventBus);
-            Machine m2 = EntityFactory.createMachine("PACKAGING", "M-02", "Boxer", "IDLE", eventBus);
+            Machine m1 = EntityFactory.createMachine("PROCESSING", "M-01", "Drill Press", "IDLE");
+            Machine m2 = EntityFactory.createMachine("PACKAGING", "M-02", "Boxer", "IDLE");
 
             // 3. Create Sensors
             // Decoupled: Sensor knows its location, but Station doesn't own it.
-            Sensor s1 = EntityFactory.createSensor("S-01", prod.getId(), "Temperature", 30.0, 10, eventBus);
+            Sensor s1 = EntityFactory.createSensor("S-01", prod.getId(), "Temperature", 30.0, eventBus);
 
             // 4. Create Conveyors
-            ConveyorBelt c1 = EntityFactory.createConveyor("C-01", 5, 20, eventBus);
-            ConveyorBelt c2 = EntityFactory.createConveyor("C-02", 5, 20, eventBus);
+            ConveyorBelt c1 = EntityFactory.createConveyor("C-01", 5, 20);
+            ConveyorBelt c2 = EntityFactory.createConveyor("C-02", 5, 20);
 
             // 5. Wire them up
             prod.addMachine(m1);
@@ -261,7 +256,7 @@ public class WorkFlowController {
             throw new IllegalArgumentException("No suitable station found for machine type " + typeStr);
         }
 
-        Machine machine = EntityFactory.createMachine(typeStr, id, name, "IDLE", eventBus);
+        Machine machine = EntityFactory.createMachine(typeStr, id, name, "IDLE");
         targetStation.addMachine(machine);
 
         machineRepo.save(machine);

@@ -35,7 +35,6 @@ public class SensorRepository extends Repository<Sensor> {
                 rs.getString("locationId"),
                 rs.getString("type"),
                 rs.getDouble("threshold"),
-                rs.getInt("samplingRate"),
                 eventBus);
     }
 

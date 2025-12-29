@@ -27,4 +27,12 @@ public class InputStation extends Station {
             waitingQueue.remove(item);
         }
     }
+
+    private void onProductReadyForTransfer(ProductItem item) {
+        // Strict Refactor: ProductReadyForTransferEvent is forbidden.
+        // Logic should be handled by polling or direct assignment if applicable.
+        // For now, we log that it's ready. The ProductionLineService likely picks it
+        // up.
+        org.Automation.core.Logger.info("InputStation: Product " + item.getId() + " ready for transfer.");
+    }
 }

@@ -10,7 +10,7 @@ public abstract class Event {
     private final String type;
     private final long tickTimestamp;
 
-    public Event(String type) {
+    protected Event(String type) {
         this.type = type;
         this.tickTimestamp = SimulationClock.getInstance().getLogicalTick();
     }

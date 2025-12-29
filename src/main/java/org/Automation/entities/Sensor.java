@@ -91,4 +91,8 @@ public abstract class Sensor implements Tickable {
     public String getCurrentProductId() {
         return currentProductId;
     }
+
+    public int getSamplingRateTicks() {
+        return 1;
+    }
 }

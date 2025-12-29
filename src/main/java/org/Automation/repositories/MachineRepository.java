@@ -8,11 +8,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class MachineRepository extends Repository<Machine> {
-    private final EventBus eventBus;
 
     public MachineRepository(DatabaseManager db, EventBus eventBus) {
         super("Machine", db);
-        this.eventBus = eventBus;
+        // eventBus unused
     }
 
     @Override
@@ -29,26 +28,24 @@ public class MachineRepository extends Repository<Machine> {
     @Override
     protected Machine mapRow(ResultSet rs) throws SQLException {
         return EntityFactory.createMachine(
-            rs.getString("type"),
-            rs.getString("id"),
-            null, // Name not in table yet
-            rs.getString("status"),
-            eventBus
-        );
+                rs.getString("type"),
+                rs.getString("id"),
+                null, // Name not in table yet
+                rs.getString("status"));
     }
 
     @Override
     public void save(Machine machine) {
-        String[] columns = {"id", "type", "status"};
+        String[] columns = { "id", "type", "status" };
         Object[] values = {
-            machine.getId(),
-            machine.getType().toString(),
-            machine.getStatus().toString()
+                machine.getId(),
+                machine.getType().toString(),
+                machine.getStatus().toString()
         };
         db.insert(tableName, columns, values);
     }
 
     public void delete(String id) {
-        db.delete(tableName, "id=?", new Object[]{id});
+        db.delete(tableName, "id=?", new Object[] { id });
     }
 }

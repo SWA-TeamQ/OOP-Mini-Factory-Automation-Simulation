@@ -3,15 +3,13 @@ package org.Automation.services;
 import org.Automation.entities.*;
 import org.Automation.repositories.*;
 import org.Automation.core.*;
-import org.Automation.events.*;
 
 public class ConveyorService implements IConveyorService {
     private final ConveyorRepository conveyorRepo;
-    private final EventBus eventBus;
 
     public ConveyorService(ConveyorRepository conveyorRepo, EventBus eventBus) {
         this.conveyorRepo = conveyorRepo;
-        this.eventBus = eventBus;
+        // eventBus unused
     }
 
     @Override
@@ -19,7 +17,7 @@ public class ConveyorService implements IConveyorService {
         ConveyorBelt conveyor = conveyorRepo.findById(conveyorId);
         if (conveyor != null) {
             // Logic to start conveyor (e.g. setting a status if added later)
-            eventBus.publish(new ConveyorStartedEvent(conveyorId));
+            // eventBus.publish(new ConveyorStartedEvent(conveyorId)); // REMOVED
             Logger.info("Conveyor " + conveyorId + " started.");
         }
     }
@@ -28,7 +26,7 @@ public class ConveyorService implements IConveyorService {
     public void stopConveyor(String conveyorId) {
         ConveyorBelt conveyor = conveyorRepo.findById(conveyorId);
         if (conveyor != null) {
-            eventBus.publish(new ConveyorStoppedEvent(conveyorId));
+            // eventBus.publish(new ConveyorStoppedEvent(conveyorId)); // REMOVED
             Logger.info("Conveyor " + conveyorId + " stopped.");
         }
     }
