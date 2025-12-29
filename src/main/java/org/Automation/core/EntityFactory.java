@@ -9,11 +9,11 @@ import org.Automation.entities.enums.*;
  */
 public class EntityFactory {
 
-    public static Station createStation(String type, String id, String status) {
+    public static Station createStation(String type, String id, String status, EventBus eventBus) {
         Station station = switch (type.toUpperCase()) {
-            case "INPUT" -> new InputStation(id);
-            case "PRODUCTION", "PROCESSING" -> new ProductionStation(id, null);
-            case "PACKAGING" -> new PackagingStation(id, null);
+            case "INPUT" -> new InputStation(id, eventBus);
+            case "PRODUCTION", "PROCESSING" -> new ProductionStation(id, eventBus);
+            case "PACKAGING" -> new PackagingStation(id, eventBus);
             default -> throw new IllegalArgumentException("Unknown station type: " + type);
         };
         if (status != null) {
@@ -24,22 +24,25 @@ public class EntityFactory {
 
     public static Machine createMachine(String type, String id, String name, String status, EventBus eventBus) {
         MachineType machineType = MachineType.valueOf(type.toUpperCase());
-        Machine machine = new Machine(id, machineType, eventBus);
+        Machine machine = (machineType == MachineType.PACKAGER) ? 
+                          new PackagingMachine(id, eventBus) : 
+                          new Machine(id, machineType, eventBus);
+        
         if (status != null) {
             machine.setStatus(MachineStatus.valueOf(status.toUpperCase()));
         }
         return machine;
     }
 
-    public static ProductItem createProductItem(String id, String name, double weight, String status, String createdAt, String currentStationId) {
-        ProductItem item = new ProductItem(id);
-        // Assuming ProductItem has these fields and setters or a constructor that takes them
-        return item;
+    public static ProductItem createProductItem(String id) {
+        return new ProductItem(id);
     }
     
-    public static Sensor createSensor(String id, String type, String machineId, String status, EventBus eventBus) {
-        Sensor sensor = new Sensor(id, eventBus);
-        // Set other properties if available
-        return sensor;
+    public static Sensor createSensor(String id, String type, double threshold, int samplingRate, EventBus eventBus) {
+        return new Sensor(id, type, threshold, samplingRate, eventBus);
+    }
+
+    public static ConveyorBelt createConveyor(String id, int capacity, int duration, EventBus eventBus) {
+        return new ConveyorBelt(id, capacity, duration, eventBus);
     }
 }

@@ -8,7 +8,6 @@ import org.Automation.engine.SimulationEngine;
 import org.Automation.repositories.*;
 import org.Automation.services.*;
 import org.Automation.ui.ConsoleApp;
-import org.Automation.repositories.ItemTrackingEventRepository;
 
 /**
  * Entry point of the Mini Factory Simulation Automation system.
@@ -39,10 +38,10 @@ public class Main {
         // ==============================
         // 3️⃣ REPOSITORIES (DATA LAYER)
         // ==============================
-        StationRepository stationRepository = new StationRepository(databaseManager);
+        StationRepository stationRepository = new StationRepository(databaseManager, eventBus);
         MachineRepository machineRepository = new MachineRepository(databaseManager, eventBus);
         ProductItemRepository productItemRepository = new ProductItemRepository(databaseManager);
-        ConveyorRepository conveyorRepository = new ConveyorRepository(databaseManager);
+        ConveyorRepository conveyorRepository = new ConveyorRepository(databaseManager, eventBus);
         SensorRepository sensorRepository = new SensorRepository(databaseManager, eventBus);
         ItemTrackingEventRepository itemTrackingEventRepository = new ItemTrackingEventRepository(databaseManager);
 
@@ -77,7 +76,6 @@ public class Main {
         // ==============================
         // 6️⃣ CONTROLLER (ORCHESTRATOR)
         // ==============================
-        // Create controller using already-wired services (single source of truth).
         WorkFlowController controller = new WorkFlowController(
                 productionLineService,
                 stationRepository,
@@ -90,18 +88,17 @@ public class Main {
                 databaseManager
         );
 
-// 2. Create engine USING controller
-SimulationEngine simulationEngine = new SimulationEngine(controller);
+        // 2. Create engine USING controller
+        SimulationEngine simulationEngine = new SimulationEngine(controller);
 
-// 3. Inject engine back into controller
-controller.setSimulationEngine(simulationEngine);
+        // 3. Inject engine back into controller
+        controller.setSimulationEngine(simulationEngine);
 
         
         // ==============================
         // 7️⃣ USER INTERFACE
         // ==============================
-        ConsoleApp consoleApp =
-                new ConsoleApp(controller);
+        ConsoleApp consoleApp = new ConsoleApp(controller);
 
         // ==============================
         // 8️⃣ SHUTDOWN HOOK
@@ -116,9 +113,7 @@ controller.setSimulationEngine(simulationEngine);
         // ==============================
         // 9️⃣ START APPLICATION
         // ==============================
-        
         Logger.info("Mini Factory Simulation Automation started successfully.");
-
         consoleApp.start();
     }
 }

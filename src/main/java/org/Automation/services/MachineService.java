@@ -21,7 +21,6 @@ public class MachineService implements IMachineService {
         if (machine != null) {
             machine.start();
             machineRepo.save(machine);
-            eventBus.publish("machine_started", machineId);
             Logger.info("Machine " + machineId + " started via MachineService.");
         }
     }
@@ -32,7 +31,6 @@ public class MachineService implements IMachineService {
         if (machine != null) {
             machine.stop();
             machineRepo.save(machine);
-            eventBus.publish("machine_stopped", machineId);
             Logger.info("Machine " + machineId + " stopped via MachineService.");
         }
     }
@@ -41,9 +39,12 @@ public class MachineService implements IMachineService {
     public void processItem(String machineId, ProductItem item) {
         Machine machine = machineRepo.findById(machineId);
         if (machine != null) {
-            machine.process(item);
-            machineRepo.save(machine);
-            eventBus.publish("item_processed", "Item " + item.getId() + " processed by " + machineId);
+            if (machine.assignItem(item)) {
+                machineRepo.save(machine);
+                Logger.info("Item " + item.getId() + " assigned to machine " + machineId);
+            } else {
+                Logger.warn("Failed to assign item " + item.getId() + " to machine " + machineId + " (Machine busy or stopped)");
+            }
         }
     }
 

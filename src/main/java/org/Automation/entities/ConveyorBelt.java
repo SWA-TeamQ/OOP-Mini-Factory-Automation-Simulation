@@ -1,47 +1,95 @@
 package org.Automation.entities;
 
-import java.util.LinkedList;
-import java.util.Queue;
+import org.Automation.core.Tickable;
+import org.Automation.engine.SimulationClock;
+import org.Automation.core.EventBus;
 
-public class ConveyorBelt {
-    private String id;
-    private Queue<ProductItem> beltItems = new LinkedList<>();
-    private int capacity;
-    private double speed;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Iterator;
 
-    public ConveyorBelt(String id, int capacity, double speed) {
+/**
+ * Represents a physical conveyor belt connecting two stations.
+ * Moves products over a defined transfer duration (Time-Driven).
+ */
+public class ConveyorBelt implements Tickable {
+    private final String id;
+    private final int capacity;
+    private final int transferDurationTicks; // How many ticks to move from start to end
+    
+    // Internal class to track an item in transit
+    private static class TransitItem {
+        ProductItem item;
+        long arrivalTick;
+
+        TransitItem(ProductItem item, long arrivalTick) {
+            this.item = item;
+            this.arrivalTick = arrivalTick;
+        }
+    }
+
+    private final List<TransitItem> itemsInTransit = new ArrayList<>();
+    private final EventBus eventBus;
+
+    public ConveyorBelt(String id, int capacity, int transferDurationTicks, EventBus eventBus) {
         this.id = id;
         this.capacity = capacity;
-        this.speed = speed;
+        this.transferDurationTicks = transferDurationTicks;
+        this.eventBus = eventBus;
+        
+        // Register with the central clock
+        SimulationClock.getInstance().registerTickable(this);
     }
 
-    public ConveyorBelt(String id, double speed) {
-        this.id = id;
-        this.capacity = 10; // Default capacity
-        this.speed = speed;
-    }
-
-    public String getId(){
+    public String getId() {
         return id;
     }
 
-    public double getSpeed() {
-        return speed;
-    }
-
+    /**
+     * Adds an item to the conveyor.
+     * Calculates the arrival tick based on the current tick + transfer duration.
+     */
     public boolean addItem(ProductItem item) {
-        if (beltItems.size() < capacity) {
-            beltItems.offer(item);
+        if (itemsInTransit.size() < capacity) {
+            long currentTick = SimulationClock.getInstance().getLogicalTick();
+            itemsInTransit.add(new TransitItem(item, currentTick + transferDurationTicks));
+            eventBus.publish("item_on_conveyor", "Item " + item.getId() + " entered conveyor " + id);
             return true;
         }
         return false;
     }
 
-    public ProductItem removeItem() {
-        return beltItems.poll();
+    @Override
+    public void tick(long currentTick) {
+        Iterator<TransitItem> iterator = itemsInTransit.iterator();
+        while (iterator.hasNext()) {
+            TransitItem transit = iterator.next();
+            if (currentTick >= transit.arrivalTick) {
+                // Item has reached the end of the conveyor
+                deliverItem(transit.item);
+                iterator.remove();
+            }
+        }
+    }
+
+    private void deliverItem(ProductItem item) {
+        eventBus.publish("product_delivered", item);
+        eventBus.publish("conveyor_delivery_complete", id); // Signal to the next station
     }
 
     public boolean isEmpty() {
-        return beltItems.isEmpty();
+        return itemsInTransit.isEmpty();
+    }
+
+    public int getInTransitCount() {
+        return itemsInTransit.size();
+    }
+
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public int getTransferDurationTicks() {
+        return transferDurationTicks;
     }
 }

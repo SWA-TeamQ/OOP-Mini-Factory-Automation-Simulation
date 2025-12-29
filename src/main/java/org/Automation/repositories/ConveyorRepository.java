@@ -1,14 +1,18 @@
 package org.Automation.repositories;
 
 import org.Automation.core.DatabaseManager;
+import org.Automation.core.EntityFactory;
+import org.Automation.core.EventBus;
 import org.Automation.entities.ConveyorBelt;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class ConveyorRepository extends Repository<ConveyorBelt> {
+    private final EventBus eventBus;
 
-    public ConveyorRepository(DatabaseManager db) {
+    public ConveyorRepository(DatabaseManager db, EventBus eventBus) {
         super("ConveyorBelt", db);
+        this.eventBus = eventBus;
     }
 
     @Override
@@ -16,20 +20,30 @@ public class ConveyorRepository extends Repository<ConveyorBelt> {
         return """
                 CREATE TABLE IF NOT EXISTS ConveyorBelt (
                     id TEXT PRIMARY KEY,
-                    speed REAL
+                    capacity INTEGER,
+                    duration INTEGER
                 );
                 """;
     }
 
     @Override
     protected ConveyorBelt mapRow(ResultSet rs) throws SQLException {
-        return new ConveyorBelt(rs.getString("id"), rs.getDouble("speed"));
+        return EntityFactory.createConveyor(
+            rs.getString("id"),
+            rs.getInt("capacity"),
+            rs.getInt("duration"),
+            eventBus
+        );
     }
 
     @Override
     public void save(ConveyorBelt conveyor) {
-        String[] columns = {"id", "speed"};
-        Object[] values = {conveyor.getId(), conveyor.getSpeed()};
+        String[] columns = {"id", "capacity", "duration"};
+        Object[] values = {
+            conveyor.getId(),
+            conveyor.getCapacity(),
+            conveyor.getTransferDurationTicks()
+        };
         db.insert(tableName, columns, values);
     }
 

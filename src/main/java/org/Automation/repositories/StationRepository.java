@@ -2,14 +2,17 @@ package org.Automation.repositories;
 
 import org.Automation.core.DatabaseManager;
 import org.Automation.core.EntityFactory;
+import org.Automation.core.EventBus;
 import org.Automation.entities.Station;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class StationRepository extends Repository<Station> {
+    private final EventBus eventBus;
 
-    public StationRepository(DatabaseManager db) {
+    public StationRepository(DatabaseManager db, EventBus eventBus) {
         super("Station", db);
+        this.eventBus = eventBus;
     }
 
     @Override
@@ -28,7 +31,8 @@ public class StationRepository extends Repository<Station> {
         return EntityFactory.createStation(
             rs.getString("type"),
             rs.getString("id"),
-            rs.getString("status")
+            rs.getString("status"),
+            eventBus
         );
     }
 

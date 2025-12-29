@@ -21,8 +21,8 @@ public class SensorRepository extends Repository<Sensor> {
                 CREATE TABLE IF NOT EXISTS Sensor (
                     id TEXT PRIMARY KEY,
                     type TEXT,
-                    machineId TEXT,
-                    status TEXT DEFAULT 'inactive'
+                    threshold REAL,
+                    samplingRate INTEGER
                 );
                 """;
     }
@@ -32,20 +32,20 @@ public class SensorRepository extends Repository<Sensor> {
         return EntityFactory.createSensor(
             rs.getString("id"),
             rs.getString("type"),
-            rs.getString("machineId"),
-            rs.getString("status"),
+            rs.getDouble("threshold"),
+            rs.getInt("samplingRate"),
             eventBus
         );
     }
 
     @Override
     public void save(Sensor sensor) {
-        String[] columns = {"id", "type", "machineId", "status"};
+        String[] columns = {"id", "type", "threshold", "samplingRate"};
         Object[] values = {
             sensor.getId(),
-            null, // type not in entity yet
-            null, // machineId not in entity yet
-            null  // status not in entity yet
+            sensor.getType(),
+            sensor.getThreshold(),
+            sensor.getSamplingRateTicks()
         };
         db.insert(tableName, columns, values);
     }

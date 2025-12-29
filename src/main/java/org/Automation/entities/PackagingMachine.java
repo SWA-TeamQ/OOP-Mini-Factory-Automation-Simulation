@@ -1,16 +1,11 @@
 package org.Automation.entities;
 
 import org.Automation.entities.enums.MachineType;
+import org.Automation.core.EventBus;
 
 public class PackagingMachine extends Machine {
 
-    public PackagingMachine(String id, org.Automation.core.EventBus eventBus) {
+    public PackagingMachine(String id, EventBus eventBus) {
         super(id, MachineType.PACKAGER, eventBus);
-    }
-
-    @Override
-    public void process(ProductItem item) {
-        super.process(item);
-        item.addHistory("Packaged by " + getId());
     }
 }

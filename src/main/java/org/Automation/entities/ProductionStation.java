@@ -1,22 +1,24 @@
 package org.Automation.entities;
 
 import org.Automation.entities.enums.StationStatus;
-import org.Automation.entities.enums.MachineStatus;
+import org.Automation.core.EventBus;
 
 public class ProductionStation extends Station {
-    private Machine machine;
 
-    public ProductionStation(String id, Machine machine) {
-        super(id);
-        this.machine = machine;
+    public ProductionStation(String id, EventBus eventBus) {
+        super(id, eventBus);
         this.status = StationStatus.ACTIVE;
     }
 
     @Override
     public void processItems() {
-        if (machine.getStatus() == MachineStatus.RUNNING) {
-            for (ProductItem item : itemsInStation) {
-                machine.process(item);
+        // Try to assign items to available machines
+        for (ProductItem item : new java.util.ArrayList<>(itemsInStation)) {
+            for (Machine machine : machines) {
+                if (machine.assignItem(item)) {
+                    itemsInStation.remove(item);
+                    break; // Item assigned, move to next item
+                }
             }
         }
     }

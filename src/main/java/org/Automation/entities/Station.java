@@ -1,26 +1,25 @@
 package org.Automation.entities;
 
 import org.Automation.entities.enums.StationStatus;
+import org.Automation.core.EventBus;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a physical location in the production line.
+ * Orchestrates machines and sensors (Event-Driven).
+ */
 public abstract class Station {
-    protected String id;
+    protected final String id;
     protected StationStatus status;
-    protected List<ProductItem> itemsInStation = new ArrayList<>();
-    private Machine machine;
-    private Sensor sensor;
+    protected final List<ProductItem> itemsInStation = new ArrayList<>();
+    protected final List<Machine> machines = new ArrayList<>();
+    protected final List<Sensor> sensors = new ArrayList<>();
+    protected final EventBus eventBus;
 
-
-
-    public Station(String id, Machine machine, Sensor sensor) {
+    public Station(String id, EventBus eventBus) {
         this.id = id;
-        this.machine = machine;
-        this.sensor = sensor;
-        this.status = StationStatus.INACTIVE;
-    }
-    public Station(String id) {
-        this.id = id;
+        this.eventBus = eventBus;
         this.status = StationStatus.INACTIVE;
     }
 
@@ -28,12 +27,20 @@ public abstract class Station {
         return id;
     }
 
-    public Machine getMachine() {
-        return machine;
+    public void addMachine(Machine machine) {
+        machines.add(machine);
     }
 
-    public Sensor getSensor() {
-        return sensor;
+    public void addSensor(Sensor sensor) {
+        sensors.add(sensor);
+    }
+
+    public List<Machine> getMachines() {
+        return machines;
+    }
+
+    public List<Sensor> getSensors() {
+        return sensors;
     }
 
     public StationStatus getStatus() {
@@ -44,27 +51,39 @@ public abstract class Station {
         this.status = status;
     }
 
-    public List<ProductItem> getItems() {
-        return itemsInStation;
+    /**
+     * Input Gate: Called when a product enters the station.
+     */
+    public void onProductArrived(ProductItem item) {
+        itemsInStation.add(item);
+        eventBus.publish("product_arrived", "Item " + item.getId() + " arrived at station " + id);
+        processItems();
     }
 
-    public void addItem(ProductItem item) {
-        itemsInStation.add(item);
+    /**
+     * Output Gate: Called when a product is ready to leave the station.
+     */
+    public void onProductReadyForTransfer(ProductItem item) {
+        eventBus.publish("product_ready_for_transfer", item);
+    }
+
+    public List<ProductItem> getItems() {
+        return itemsInStation;
     }
 
     public void removeItem(ProductItem item) {
         itemsInStation.remove(item);
     }
 
-       public String toString() {
+    @Override
+    public String toString() {
         return "Station{" +
                 "id='" + id + '\'' +
-                ", machine=" + machine +
-                ", sensor=" + sensor +
+                ", machines=" + machines.size() +
+                ", sensors=" + sensors.size() +
                 ", status=" + status +
                 '}';
     }
 
-    // Abstract method for processing products
     public abstract void processItems();
 }

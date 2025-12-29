@@ -1,20 +1,72 @@
 package org.Automation.entities;
 
 import org.Automation.core.EventBus;
+import org.Automation.core.Tickable;
+import org.Automation.engine.SimulationClock;
 
-public class Sensor {
-    private String id;
+import java.util.Random;
+
+/**
+ * Represents a physical sensor monitoring the production line.
+ * Samples values based on the SimulationClock (Time-Driven).
+ */
+public class Sensor implements Tickable {
+    private final String id;
+    private final String type; // e.g., "Temperature", "Weight"
     private final EventBus eventBus;
+    private final Random random = new Random();
 
-    public Sensor(String id, EventBus eventBus) {
+    private double threshold;
+    private int samplingRateTicks; // Sample every X ticks
+    private double lastValue;
+
+    public Sensor(String id, String type, double threshold, int samplingRateTicks, EventBus eventBus) {
         this.id = id;
+        this.type = type;
+        this.threshold = threshold;
+        this.samplingRateTicks = samplingRateTicks;
         this.eventBus = eventBus;
+        
+        // Register with the central clock
+        SimulationClock.getInstance().registerTickable(this);
     }
-    public String getId(){
+
+    public String getId() {
         return id;
     }
 
-    public void trigger(String event, Object payload) {
-        eventBus.publish(event, payload);
+    public String getType() {
+        return type;
+    }
+
+    @Override
+    public void tick(long currentTick) {
+        // Only sample at the configured rate
+        if (currentTick % samplingRateTicks == 0) {
+            sample();
+        }
+    }
+
+    private void sample() {
+        // Simulate a measurement (e.g., base value + noise)
+        lastValue = 20.0 + random.nextDouble() * 10.0; 
+        
+        eventBus.publish("measurement_taken", "Sensor " + id + " [" + type + "] measured: " + String.format("%.2f", lastValue));
+
+        if (lastValue > threshold) {
+            eventBus.publish("threshold_exceeded", "ALARM: Sensor " + id + " [" + type + "] exceeded threshold! Value: " + String.format("%.2f", lastValue));
+        }
+    }
+
+    public double getLastValue() {
+        return lastValue;
+    }
+
+    public double getThreshold() {
+        return threshold;
+    }
+
+    public int getSamplingRateTicks() {
+        return samplingRateTicks;
     }
 }

@@ -1,76 +1,101 @@
 package org.Automation.engine;
 
+import org.Automation.core.Tickable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Central Simulation Clock.
+ * Drives all time-dependent components in the system.
+ */
 public class SimulationClock {
-  // Singleton instance
-  private static SimulationClock instance;
+    private static SimulationClock instance;
 
-  // Instance Variables
-  private LocalDateTime currentSecond = LocalDateTime.now();
-  private boolean paused = true;
-  private int speedFactor = 1;
+    private LocalDateTime currentSecond = LocalDateTime.now();
+    private long logicalTick = 0;
+    private boolean paused = true;
+    private int speedFactor = 1;
 
-  // well we set it into a task per 50 milliseconds, meaning 20 times in a second
-  private final int Tick_Per_MS = 50;
+    // The interval between logical ticks in real-time milliseconds
+    private final int TICK_INTERVAL_MS = 50;
 
-  private ArrayList<ClockObserver> observers = new ArrayList<ClockObserver>();
-  private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private final List<ClockObserver> observers = new CopyOnWriteArrayList<>();
+    private final List<Tickable> tickables = new CopyOnWriteArrayList<>();
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-  // for the entire system to work on the same time
-  private SimulationClock() {
-    scheduler.scheduleAtFixedRate(() -> tick(), 1000, Tick_Per_MS, TimeUnit.MILLISECONDS);
-  }
-
-  public static synchronized SimulationClock getInstance() {
-    // used to create a single instance for all tasks
-    if (instance == null) {
-      instance = new SimulationClock();
+    private SimulationClock() {
+        scheduler.scheduleAtFixedRate(this::tick, 1000, TICK_INTERVAL_MS, TimeUnit.MILLISECONDS);
     }
-    return instance;
-  }
 
-  // Instance Methods
-  private void tick() {
-    if (paused)
-      return;
+    public static synchronized SimulationClock getInstance() {
+        if (instance == null) {
+            instance = new SimulationClock();
+        }
+        return instance;
+    }
 
-    // NOTE: Line changed here
-    currentSecond.plusSeconds((Tick_Per_MS * speedFactor) / 1000);
+    private void tick() {
+        if (paused) return;
 
-    for (ClockObserver observer : observers)
-      observer.onTick(currentSecond);
-  }
+        // Advance logical time
+        logicalTick++;
+        
+        // Advance simulated wall-clock time
+        // Each tick represents TICK_INTERVAL_MS * speedFactor of simulated time
+        currentSecond = currentSecond.plusNanos((long) TICK_INTERVAL_MS * speedFactor * 1_000_000L);
 
-  // NOTE: Custom method added here
-  public LocalDateTime getCurrentTime() {
-    return currentSecond;
-  }
+        // Notify Tickable components (Physical simulation)
+        for (Tickable tickable : tickables) {
+            tickable.tick(logicalTick);
+        }
 
-  public synchronized void register(ClockObserver observer) {
-    observers.add(observer);
-  }
+        // Notify Observers (UI / Logging)
+        for (ClockObserver observer : observers) {
+            observer.onTick(currentSecond);
+        }
+    }
 
-  public void start() {
-    paused = false;
-    System.out.println("The Simulation has been started at time: \n" + currentSecond);
-  }
+    public long getLogicalTick() {
+        return logicalTick;
+    }
 
-  public void stop() {
-    paused = true;
-    System.out.println("The Simulation has been stopped at time: \n" + currentSecond);
-  }
+    public LocalDateTime getCurrentTime() {
+        return currentSecond;
+    }
 
-  public void setSpeedFactor(int speed) {
-    speedFactor = speed;
-    System.out.println("The Simulation speed has been updated into: \n" + speedFactor);
-  }
+    public void registerObserver(ClockObserver observer) {
+        observers.add(observer);
+    }
 
-  public LocalDateTime getCurrentSecond() {
-    return currentSecond;
-  }
+    public void registerTickable(Tickable tickable) {
+        tickables.add(tickable);
+    }
+
+    public void start() {
+        paused = false;
+        System.out.println("The Simulation has been started at time: \n" + currentSecond);
+    }
+
+    public void stop() {
+        paused = true;
+        System.out.println("The Simulation has been stopped at time: \n" + currentSecond);
+    }
+
+    public void setSpeedFactor(int speed) {
+        this.speedFactor = speed;
+        System.out.println("The Simulation speed has been updated to: " + speedFactor);
+    }
+
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public void shutdown() {
+        scheduler.shutdown();
+    }
 }
