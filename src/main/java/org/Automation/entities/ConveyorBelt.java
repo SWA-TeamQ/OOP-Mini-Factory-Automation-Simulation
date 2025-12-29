@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 
 import org.automation.core.Logger;
 import org.automation.engine.SimulationClock;
-import org.automation.engine.Tickable;
+import org.automation.engine.interfaces.Tickable;
 
 /**
  * Represents a physical conveyor belt connecting two stations.

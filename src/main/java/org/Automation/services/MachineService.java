@@ -5,6 +5,7 @@ import org.automation.core.Logger;
 import org.automation.entities.Machine;
 import org.automation.entities.ProductItem;
 import org.automation.repositories.MachineRepository;
+import org.automation.services.interfaces.IMachineService;
 
 public class MachineService implements IMachineService {
     private final MachineRepository machineRepo;

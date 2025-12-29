@@ -2,6 +2,7 @@ package org.automation.core;
 
 import java.util.*;
 
+import org.automation.core.interfaces.EventSubscriber;
 import org.automation.events.*;
 
 public class EventBus {

@@ -1,4 +1,4 @@
-package org.automation.services;
+package org.automation.services.interfaces;
 
 import org.automation.entities.ConveyorBelt;
 import org.automation.entities.ProductItem;

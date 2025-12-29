@@ -4,7 +4,7 @@ import java.util.Random;
 
 import org.automation.core.EventBus;
 import org.automation.engine.SimulationClock;
-import org.automation.engine.Tickable;
+import org.automation.engine.interfaces.Tickable;
 
 /**
  * Represents a physical sensor monitoring the production line.

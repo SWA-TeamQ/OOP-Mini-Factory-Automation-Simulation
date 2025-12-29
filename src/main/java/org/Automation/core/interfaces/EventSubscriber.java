@@ -1,4 +1,4 @@
-package org.automation.core;
+package org.automation.core.interfaces;
 
 import org.automation.events.Event;
 

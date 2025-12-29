@@ -1,11 +1,14 @@
 package org.automation.controllers;
 
 import org.automation.core.*;
+import org.automation.core.interfaces.EventSubscriber;
 import org.automation.engine.*;
 import org.automation.entities.*;
 import org.automation.events.*;
 import org.automation.repositories.*;
 import org.automation.services.*;
+import org.automation.services.interfaces.IConveyorService;
+import org.automation.services.interfaces.IMachineService;
 
 /**
  * Coordinates the mini factory workflow.

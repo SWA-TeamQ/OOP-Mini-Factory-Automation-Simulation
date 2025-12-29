@@ -1,10 +1,12 @@
 package org.automation.services;
 
 import org.automation.core.*;
+import org.automation.core.interfaces.EventSubscriber;
 import org.automation.engine.SimulationClock;
 import org.automation.entities.*;
 import org.automation.events.*;
 import org.automation.repositories.*;
+import org.automation.services.interfaces.IItemTrackingService;
 
 /**
  * Tracks product items through the production line.

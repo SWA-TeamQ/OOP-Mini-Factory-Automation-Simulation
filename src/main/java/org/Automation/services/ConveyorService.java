@@ -3,6 +3,7 @@ package org.automation.services;
 import org.automation.core.*;
 import org.automation.entities.*;
 import org.automation.repositories.*;
+import org.automation.services.interfaces.IConveyorService;
 
 public class ConveyorService implements IConveyorService {
     private final ConveyorRepository conveyorRepo;

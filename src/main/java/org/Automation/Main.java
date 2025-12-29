@@ -7,6 +7,8 @@ import org.automation.core.Logger;
 import org.automation.engine.SimulationEngine;
 import org.automation.repositories.*;
 import org.automation.services.*;
+import org.automation.services.interfaces.IConveyorService;
+import org.automation.services.interfaces.IMachineService;
 import org.automation.ui.ConsoleApp;
 
 /**
