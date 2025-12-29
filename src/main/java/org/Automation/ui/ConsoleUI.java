@@ -30,6 +30,10 @@ public class ConsoleUI {
 
     while (running) {
         showMenu();
+        if (!scanner.hasNextInt()) {
+            scanner.nextLine(); // consume invalid input
+            continue;
+        }
         int choice = scanner.nextInt();
         scanner.nextLine(); // consume newline
 

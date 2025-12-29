@@ -77,6 +77,12 @@ public class ProductionLineService implements IProductionLineService {
         if (!stations.isEmpty()) {
             Station firstStation = stations.get(0);
             itemLocationMap.put(item.getId(), firstStation.getId());
+            
+            // Ensure machines are running
+            for (Machine m : firstStation.getMachines()) {
+                machineService.startMachine(m.getId());
+            }
+            
             firstStation.onProductArrived(item);
             Logger.info("Item " + item.getId() + " entered the production line at " + firstStation.getId());
         }
@@ -129,6 +135,12 @@ public class ProductionLineService implements IProductionLineService {
             Station nextStation = stationRepo.findById(nextStationId);
             if (nextStation != null) {
                 itemLocationMap.put(item.getId(), nextStation.getId());
+                
+                // Ensure machines are running
+                for (Machine m : nextStation.getMachines()) {
+                    machineService.startMachine(m.getId());
+                }
+                
                 nextStation.onProductArrived(item);
                 Logger.info("Item " + item.getId() + " arrived at station " + nextStation.getId());
             }
