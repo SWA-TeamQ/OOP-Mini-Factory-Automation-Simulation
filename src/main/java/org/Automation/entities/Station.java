@@ -24,7 +24,7 @@ public abstract class Station {
         this.status = StationStatus.INACTIVE;
 
         // Subscribe to machine availability events to drive the queue
-        this.eventBus.subscribe("product_ready_for_transfer", new EventSubscriber() {
+        this.eventBus.subscribe("ProductReadyForTransferEvent", new EventSubscriber() {
             @Override
             public void onEvent(Event payload) {
                 // A machine finished. Since we don't strictly know if it was *our* machine
@@ -68,8 +68,7 @@ public abstract class Station {
      * Input Gate: Called when a product enters the station.
      */
     public void onProductArrived(ProductItem item) {
-        eventBus.publish(new ProductEvent("product_arrived",
-                "Item " + item.getId() + " arrived at station " + id));
+        eventBus.publish(new org.Automation.events.ProductArrivedAtStationEvent(id, item.getId()));
         waitingQueue.add(item); // Always enqueue first
         processQueue(); // Then try to process
     }
@@ -78,7 +77,7 @@ public abstract class Station {
      * Output Gate: Called when a product is ready to leave the station.
      */
     public void onProductReadyForTransfer(ProductItem item) {
-        eventBus.publish(new ProductEvent("product_ready_for_transfer", item));
+        eventBus.publish(new org.Automation.events.ProductReadyForTransferEvent(item, id));
     }
 
     public List<ProductItem> getItems() {
@@ -109,7 +108,7 @@ public abstract class Station {
         java.util.Iterator<Machine> machineIt = machines.iterator();
         while (machineIt.hasNext() && !waitingQueue.isEmpty()) {
             Machine m = machineIt.next();
-            if (m.getStatus() == org.Automation.entities.enums.MachineStatus.IDLE) {
+            if (m.getStatus() == MachineStatus.IDLE) {
                 ProductItem item = waitingQueue.peek(); // Start with peek logic, or just poll if we are sure
                 if (m.assignItem(item)) {
                     waitingQueue.poll(); // Actually remove now

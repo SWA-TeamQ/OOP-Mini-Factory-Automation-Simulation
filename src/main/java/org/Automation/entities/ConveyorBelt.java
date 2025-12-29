@@ -53,8 +53,7 @@ public class ConveyorBelt implements Tickable {
         if (itemsInTransit.size() < capacity) {
             long currentTick = SimulationClock.getInstance().getLogicalTick();
             itemsInTransit.add(new TransitItem(item, currentTick + transferDurationTicks));
-            eventBus.publish(new org.Automation.events.ConveyorEvent("item_on_conveyor",
-                    "Item " + item.getId() + " entered conveyor " + id));
+            eventBus.publish(new org.Automation.events.ConveyorItemAddedEvent(id, item.getId()));
             return true;
         }
         return false;
@@ -74,9 +73,7 @@ public class ConveyorBelt implements Tickable {
     }
 
     private void deliverItem(ProductItem item) {
-        eventBus.publish(new org.Automation.events.ProductEvent("product_delivered", item));
-        eventBus.publish(new org.Automation.events.ConveyorEvent("conveyor_delivery_complete", id)); // Signal to the
-                                                                                                     // next station
+        eventBus.publish(new org.Automation.events.ProductDeliveredEvent(item));
     }
 
     public boolean isEmpty() {

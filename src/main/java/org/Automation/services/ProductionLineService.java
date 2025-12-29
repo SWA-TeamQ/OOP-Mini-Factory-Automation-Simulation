@@ -54,21 +54,21 @@ public class ProductionLineService implements IProductionLineService {
     private void setupEventHandlers() {
         // When a machine finishes, the station signals the product is ready for
         // transfer
-        eventBus.subscribe("product_ready_for_transfer", new org.Automation.core.EventSubscriber() {
+        eventBus.subscribe("ProductReadyForTransferEvent", new org.Automation.core.EventSubscriber() {
             @Override
             public void onEvent(org.Automation.events.Event payload) {
-                if (payload.getSource() instanceof ProductItem item) {
-                    handleTransfer(item);
+                if (payload instanceof org.Automation.events.ProductReadyForTransferEvent event) {
+                    handleTransfer(event.getProductItem());
                 }
             }
         });
 
         // When a conveyor delivers an item, it enters the next station
-        eventBus.subscribe("product_delivered", new org.Automation.core.EventSubscriber() {
+        eventBus.subscribe("ProductDeliveredEvent", new org.Automation.core.EventSubscriber() {
             @Override
             public void onEvent(org.Automation.events.Event payload) {
-                if (payload.getSource() instanceof ProductItem item) {
-                    handleArrival(item);
+                if (payload instanceof org.Automation.events.ProductDeliveredEvent event) {
+                    handleArrival(event.getProductItem());
                 }
             }
         });

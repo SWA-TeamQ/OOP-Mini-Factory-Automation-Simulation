@@ -101,25 +101,25 @@ public class WorkFlowController {
     }
 
     private void subscribeEvents() {
-        eventBus.subscribe("machine_error", new EventSubscriber() {
+        eventBus.subscribe("MachineErrorEvent", new EventSubscriber() {
             @Override
             public void onEvent(Event event) {
                 Logger.error("Machine error: " + event.getSource());
             }
         });
-        eventBus.subscribe("machine_started", new EventSubscriber() {
+        eventBus.subscribe("MachineStartedEvent", new EventSubscriber() {
             @Override
             public void onEvent(Event event) {
                 Logger.info("Machine started: " + event.getSource());
             }
         });
-        eventBus.subscribe("machine_stopped", new EventSubscriber() {
+        eventBus.subscribe("MachineStoppedEvent", new EventSubscriber() {
             @Override
             public void onEvent(Event event) {
                 Logger.info("Machine stopped: " + event.getSource());
             }
         });
-        eventBus.subscribe("item_completed", new EventSubscriber() {
+        eventBus.subscribe("ItemCompletedEvent", new EventSubscriber() {
             @Override
             public void onEvent(Event event) {
                 Logger.info("Item completed: " + event.getSource());

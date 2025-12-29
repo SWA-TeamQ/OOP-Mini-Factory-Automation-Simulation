@@ -5,6 +5,7 @@ import org.Automation.engine.*;
 import org.Automation.engine.Tickable;
 import org.Automation.entities.enums.*;
 import org.Automation.events.*;
+import org.Automation.core.EventBus;
 
 import java.util.Random;
 
@@ -56,14 +57,14 @@ public class Machine implements Tickable {
     public void start() {
         if (status == MachineStatus.STOPPED) {
             status = MachineStatus.IDLE;
-            eventBus.publish(new MachineEvent("machine_started", id));
+            eventBus.publish(new org.Automation.events.MachineStartedEvent(id));
         }
     }
 
     public void stop() {
         if (status != MachineStatus.ERROR) {
             status = MachineStatus.STOPPED;
-            eventBus.publish(new MachineEvent("machine_stopped", id));
+            eventBus.publish(new org.Automation.events.MachineStoppedEvent(id));
         }
     }
 
@@ -75,8 +76,7 @@ public class Machine implements Tickable {
             this.currentItem = item;
             this.status = MachineStatus.BUSY;
             this.processingTicksRemaining = totalProcessingTicks + random.nextInt(10); // Add some variability
-            eventBus.publish(new org.Automation.events.MachineEvent("processing_started",
-                    "Machine " + id + " started processing " + item.getId()));
+            eventBus.publish(new org.Automation.events.MachineProcessingStartedEvent(id, item.getId()));
             return true;
         }
         return false;
@@ -91,7 +91,7 @@ public class Machine implements Tickable {
         // Simulate potential failure
         if (random.nextInt(1000) < 2) { // 0.2% chance per tick
             status = MachineStatus.ERROR;
-            eventBus.publish(new MachineEvent("machine_error",
+            eventBus.publish(new org.Automation.events.MachineErrorEvent(id,
                     "Machine " + id + " failed during processing of " + currentItem.getId()));
             return;
         }
@@ -113,15 +113,14 @@ public class Machine implements Tickable {
 
         finishedItem.addHistory(
                 "Processed by " + type + " [" + id + "] at tick " + SimulationClock.getInstance().getLogicalTick());
-        eventBus.publish(new MachineEvent("processing_completed", finishedItem));
-        eventBus.publish(new MachineEvent("product_ready_for_transfer", id)); // Signal to
-                                                                              // station/conveyor
+        eventBus.publish(new org.Automation.events.MachineProcessingFinishedEvent(id, finishedItem));
+        eventBus.publish(new org.Automation.events.ProductReadyForTransferEvent(finishedItem, id));
     }
 
     public void repair() {
         if (status == MachineStatus.ERROR) {
             status = MachineStatus.IDLE;
-            eventBus.publish(new MachineEvent("machine_repaired", id));
+            eventBus.publish(new MachineRepairedEvent(id));
         }
     }
 

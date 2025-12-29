@@ -39,7 +39,17 @@ public class EntityFactory {
 
     public static Sensor createSensor(String id, String locationId, String type, double threshold, int samplingRate,
             EventBus eventBus) {
-        return new Sensor(id, locationId, type, threshold, samplingRate, eventBus);
+        if ("Temperature".equalsIgnoreCase(type)) {
+            return new TemperatureSensor(id, locationId, threshold, samplingRate, eventBus);
+        } else if ("Weight".equalsIgnoreCase(type)) {
+            return new WeightSensor(id, locationId, threshold, samplingRate, eventBus);
+        } else {
+            // Default fallback if type is unknown, but since Sensor is abstract we must
+            // pick one or throw error
+            // For safety in this prompt context, defaulting to Temperature or throwing
+            // exception
+            throw new IllegalArgumentException("Unknown sensor type: " + type);
+        }
     }
 
     public static ConveyorBelt createConveyor(String id, int capacity, int duration, EventBus eventBus) {
