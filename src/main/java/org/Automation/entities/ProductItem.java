@@ -16,6 +16,10 @@ public class ProductItem {
     private long endTick;
     private final List<String> history = new ArrayList<>();
 
+    // Sensor values for display
+    private double temperature = 20.0; // Default ambient
+    private double weight = 10.0; // Default nominal
+
     public ProductItem(String id) {
         this.id = id;
         this.completed = false;
@@ -73,5 +77,21 @@ public class ProductItem {
 
     public List<String> getHistory() {
         return history;
+    }
+
+    public double getTemperature() {
+        return temperature;
+    }
+
+    public void setTemperature(double temperature) {
+        this.temperature = temperature;
+    }
+
+    public double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(double weight) {
+        this.weight = weight;
     }
 }

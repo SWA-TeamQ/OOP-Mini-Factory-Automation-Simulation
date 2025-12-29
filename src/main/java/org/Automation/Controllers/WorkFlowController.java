@@ -94,6 +94,7 @@ public class WorkFlowController {
                 sensorService,
                 machineService,
                 conveyorService,
+                sensorRepo,
                 eventBus);
 
         subscribeEvents();

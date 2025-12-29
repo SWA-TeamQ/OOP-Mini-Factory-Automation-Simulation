@@ -55,6 +55,12 @@ public class ItemTrackingService implements IItemTrackingService {
         item.setStartTick(currentTick);
         productRepo.save(item);
         Logger.info("Item " + item.getId() + " registered at tick " + currentTick);
+
+        // Display initial sensor values (pre-production)
+        Logger.info(String.format("[Pre-Production] Product %s | Initial Temperature: %.2f C",
+                item.getId(), item.getTemperature()));
+        Logger.info(String.format("[Pre-Production] Product %s | Initial Weight: %.2f kg",
+                item.getId(), item.getWeight()));
     }
 
     /**

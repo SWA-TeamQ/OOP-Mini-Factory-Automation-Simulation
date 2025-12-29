@@ -24,6 +24,10 @@ public abstract class Sensor implements Tickable {
     // The product currently being measured (set during processing)
     protected String currentProductId;
 
+    // Logging limit: max 5 logs per product at this sensor's location
+    private static final int MAX_LOGS_PER_PRODUCT = 5;
+    private int logCount = 0;
+
     public Sensor(String id, String locationId, String type, double threshold, EventBus eventBus) {
         this.id = id;
         this.locationId = locationId;
@@ -38,9 +42,11 @@ public abstract class Sensor implements Tickable {
     /**
      * Sets the current product being measured.
      * Called when a product starts processing at this sensor's location.
+     * Resets log counter for the new product.
      */
     public void setCurrentProduct(String productId) {
         this.currentProductId = productId;
+        this.logCount = 0; // Reset log counter for new product
     }
 
     /**
@@ -48,15 +54,27 @@ public abstract class Sensor implements Tickable {
      */
     public void clearCurrentProduct() {
         this.currentProductId = null;
+        this.logCount = 0; // Reset log counter
     }
 
     /**
      * Samples and validates every tick if a product is being processed.
+     * Limits console logging to MAX_LOGS_PER_PRODUCT entries.
      */
     @Override
     public void tick(long currentTick) {
         if (currentProductId != null) {
             readValue();
+
+            // Real-time sensor display during processing (limited to 5 logs)
+            if (logCount < MAX_LOGS_PER_PRODUCT) {
+                logCount++;
+                org.Automation.core.Logger
+                        .info(String.format("[Tick %d] [Sensor %s] Product %s | %s: %.2f (Threshold: %.2f) [Log %d/%d]",
+                                currentTick, id, currentProductId, type, lastValue, threshold, logCount,
+                                MAX_LOGS_PER_PRODUCT));
+            }
+
             validateReading();
         }
     }

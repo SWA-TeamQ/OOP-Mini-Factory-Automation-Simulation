@@ -32,6 +32,7 @@ public class ProductionLineService implements IProductionLineService {
     private final ItemTrackingService itemTrackingService;
     private final IMachineService machineService;
     private final ProductItemRepository productRepo;
+    private final SensorRepository sensorRepo;
 
     // Tracks which station each product is currently at
     private final Map<String, String> itemLocationMap = new HashMap<>();
@@ -44,12 +45,14 @@ public class ProductionLineService implements IProductionLineService {
             SensorService sensorService,
             IMachineService machineService,
             IConveyorService conveyorService,
+            SensorRepository sensorRepository,
             EventBus eventBus) {
         this.stationRepo = stationRepo;
         this.productRepo = productRepo;
         this.conveyorRepo = conveyorRepo;
         this.itemTrackingService = itemTrackingService;
         this.machineService = machineService;
+        this.sensorRepo = sensorRepository;
 
         setupConveyorCallbacks();
         setupMachineCallbacks();
@@ -142,6 +145,9 @@ public class ProductionLineService implements IProductionLineService {
         if (currentStation == null)
             return;
 
+        // Clear sensors at current station since product is leaving
+        notifySensorsProductEnd(currentStationId);
+
         List<Station> stations = stationRepo.findAll();
         int currentIndex = -1;
         for (int i = 0; i < stations.size(); i++) {
@@ -153,12 +159,65 @@ public class ProductionLineService implements IProductionLineService {
 
         if (currentIndex >= 0 && currentIndex < stations.size() - 1) {
             Station nextStation = stations.get(currentIndex + 1);
-            moveItemViaConveyor(item, currentStation, nextStation);
+
+            // Strict Refactor: Instant Process Start from Input
+            // If current station is INPUT and has no machines, bypass conveyor to start
+            // instantaneously.
+            if (currentStation.getType() == StationType.INPUT && currentStation.getMachines().isEmpty()) {
+                moveItemInstantly(item, currentStation, nextStation);
+            } else {
+                moveItemViaConveyor(item, currentStation, nextStation);
+            }
         } else {
             // Last station reached - mark completed
             itemTrackingService.markCompleted(item);
             itemLocationMap.remove(item.getId());
             Logger.info("Item " + item.getId() + " has completed the production line.");
+        }
+    }
+
+    /**
+     * Bypasses conveyor to move item instantly to next station.
+     */
+    private void moveItemInstantly(ProductItem item, Station from, Station to) {
+        from.removeItem(item);
+        itemLocationMap.put(item.getId(), to.getId());
+
+        // Ensure machines are running at destination
+        for (Machine m : to.getMachines()) {
+            machineService.startMachine(m.getId());
+        }
+
+        // Notify sensors that this product is now being processed at this station
+        notifySensorsProductStart(item.getId(), to.getId());
+
+        long tick = org.Automation.engine.SimulationClock.getInstance().getLogicalTick();
+        Logger.info(String.format(
+                "[Tick %d] [Instant Transfer] Item %s moved instantly from %s to %s to assign to idle machine.",
+                tick, item.getId(), from.getId(), to.getId()));
+
+        to.onProductArrived(item); // Triggers assignItem via processQueue immediately
+    }
+
+    /**
+     * Notifies all sensors at a location that a product is being processed.
+     */
+    private void notifySensorsProductStart(String productId, String stationId) {
+        for (Sensor sensor : sensorRepo.findAll()) {
+            if (sensor.getLocationId().equals(stationId)) {
+                sensor.setCurrentProduct(productId);
+            }
+        }
+    }
+
+    /**
+     * Clears sensor product tracking when processing finishes.
+     */
+    private void notifySensorsProductEnd(String stationId) {
+        for (Sensor sensor : sensorRepo.findAll()) {
+            if (sensor.getLocationId().equals(stationId)) {
+                sensor.clearCurrentProduct();
+            }
         }
     }
 
@@ -191,6 +250,9 @@ public class ProductionLineService implements IProductionLineService {
                 for (Machine m : nextStation.getMachines()) {
                     machineService.startMachine(m.getId());
                 }
+
+                // Notify sensors that this product is now being processed at this station
+                notifySensorsProductStart(item.getId(), nextStation.getId());
 
                 nextStation.onProductArrived(item);
 
