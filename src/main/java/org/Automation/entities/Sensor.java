@@ -12,6 +12,7 @@ import java.util.Random;
  */
 public class Sensor implements Tickable {
     private final String id;
+    private final String locationId; // The station this sensor monitors (decoupled)
     private final String type; // e.g., "Temperature", "Weight"
     private final EventBus eventBus;
     private final Random random = new Random();
@@ -20,19 +21,25 @@ public class Sensor implements Tickable {
     private int samplingRateTicks; // Sample every X ticks
     private double lastValue;
 
-    public Sensor(String id, String type, double threshold, int samplingRateTicks, EventBus eventBus) {
+    public Sensor(String id, String locationId, String type, double threshold, int samplingRateTicks,
+            EventBus eventBus) {
         this.id = id;
+        this.locationId = locationId;
         this.type = type;
         this.threshold = threshold;
         this.samplingRateTicks = samplingRateTicks;
         this.eventBus = eventBus;
-        
+
         // Register with the central clock
         SimulationClock.getInstance().registerTickable(this);
     }
 
     public String getId() {
         return id;
+    }
+
+    public String getLocationId() {
+        return locationId;
     }
 
     public String getType() {
@@ -49,12 +56,14 @@ public class Sensor implements Tickable {
 
     private void sample() {
         // Simulate a measurement (e.g., base value + noise)
-        lastValue = 20.0 + random.nextDouble() * 10.0; 
-        
-        eventBus.publish("measurement_taken", "Sensor " + id + " [" + type + "] measured: " + String.format("%.2f", lastValue));
+        lastValue = 20.0 + random.nextDouble() * 10.0;
+
+        eventBus.publish("measurement_taken",
+                "Sensor " + id + " [" + type + "] measured: " + String.format("%.2f", lastValue));
 
         if (lastValue > threshold) {
-            eventBus.publish("threshold_exceeded", "ALARM: Sensor " + id + " [" + type + "] exceeded threshold! Value: " + String.format("%.2f", lastValue));
+            eventBus.publish("threshold_exceeded", "ALARM: Sensor " + id + " [" + type + "] exceeded threshold! Value: "
+                    + String.format("%.2f", lastValue));
         }
     }
 

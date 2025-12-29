@@ -10,7 +10,8 @@ import java.util.Random;
 
 /**
  * Represents a physical machine in the factory.
- * Driven by the SimulationClock (Time-Driven) and controlled via commands (Event-Driven).
+ * Driven by the SimulationClock (Time-Driven) and controlled via commands
+ * (Event-Driven).
  */
 public class Machine implements Tickable {
 
@@ -30,27 +31,38 @@ public class Machine implements Tickable {
         this.type = type;
         this.eventBus = eventBus;
         this.status = MachineStatus.IDLE;
-        
+
         // Register with the central clock
         SimulationClock.getInstance().registerTickable(this);
     }
 
-    public String getId() { return id; }
-    public MachineType getType() { return type; }
-    public MachineStatus getStatus() { return status; }
-    public void setStatus(MachineStatus status) { this.status = status; }
+    public String getId() {
+        return id;
+    }
+
+    public MachineType getType() {
+        return type;
+    }
+
+    public MachineStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(MachineStatus status) {
+        this.status = status;
+    }
 
     // Commands (Event-Driven)
-    public void start() { 
-        if (status == MachineStatus.STOPPED || status == MachineStatus.IDLE) {
-            status = MachineStatus.RUNNING; 
+    public void start() {
+        if (status == MachineStatus.STOPPED) {
+            status = MachineStatus.IDLE;
             eventBus.publish("machine_started", id);
         }
     }
 
-    public void stop() { 
+    public void stop() {
         if (status != MachineStatus.ERROR) {
-            status = MachineStatus.STOPPED; 
+            status = MachineStatus.STOPPED;
             eventBus.publish("machine_stopped", id);
         }
     }
@@ -59,8 +71,9 @@ public class Machine implements Tickable {
      * Assigns an item to the machine to begin processing.
      */
     public boolean assignItem(ProductItem item) {
-        if (status == MachineStatus.RUNNING && currentItem == null) {
+        if (status == MachineStatus.IDLE && currentItem == null) {
             this.currentItem = item;
+            this.status = MachineStatus.BUSY;
             this.processingTicksRemaining = totalProcessingTicks + random.nextInt(10); // Add some variability
             eventBus.publish("processing_started", "Machine " + id + " started processing " + item.getId());
             return true;
@@ -70,7 +83,7 @@ public class Machine implements Tickable {
 
     @Override
     public void tick(long currentTick) {
-        if (status != MachineStatus.RUNNING || currentItem == null) {
+        if (status != MachineStatus.BUSY || currentItem == null) {
             return;
         }
 
@@ -89,10 +102,17 @@ public class Machine implements Tickable {
     }
 
     private void completeProcessing() {
-        currentItem.addHistory("Processed by " + type + " [" + id + "] at tick " + SimulationClock.getInstance().getLogicalTick());
-        eventBus.publish("processing_completed", currentItem);
-        eventBus.publish("product_ready_for_transfer", id); // Signal to station/conveyor
+        ProductItem finishedItem = this.currentItem;
+
+        // State update FIRST to ensure re-entrancy/synchronous listeners see correct
+        // state
+        this.status = MachineStatus.IDLE;
         this.currentItem = null;
+
+        finishedItem.addHistory(
+                "Processed by " + type + " [" + id + "] at tick " + SimulationClock.getInstance().getLogicalTick());
+        eventBus.publish("processing_completed", finishedItem);
+        eventBus.publish("product_ready_for_transfer", id); // Signal to station/conveyor
     }
 
     public void repair() {
@@ -104,7 +124,7 @@ public class Machine implements Tickable {
 
     @Override
     public String toString() {
-        return "Machine{" + "id='" + id + '\'' + ", type=" + type + ", status=" + status + 
-               (currentItem != null ? ", processing=" + currentItem.getId() : "") + '}';
+        return "Machine{" + "id='" + id + '\'' + ", type=" + type + ", status=" + status +
+                (currentItem != null ? ", processing=" + currentItem.getId() : "") + '}';
     }
 }

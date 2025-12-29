@@ -20,6 +20,7 @@ public class SensorRepository extends Repository<Sensor> {
         return """
                 CREATE TABLE IF NOT EXISTS Sensor (
                     id TEXT PRIMARY KEY,
+                    locationId TEXT,
                     type TEXT,
                     threshold REAL,
                     samplingRate INTEGER
@@ -30,27 +31,28 @@ public class SensorRepository extends Repository<Sensor> {
     @Override
     protected Sensor mapRow(ResultSet rs) throws SQLException {
         return EntityFactory.createSensor(
-            rs.getString("id"),
-            rs.getString("type"),
-            rs.getDouble("threshold"),
-            rs.getInt("samplingRate"),
-            eventBus
-        );
+                rs.getString("id"),
+                rs.getString("locationId"),
+                rs.getString("type"),
+                rs.getDouble("threshold"),
+                rs.getInt("samplingRate"),
+                eventBus);
     }
 
     @Override
     public void save(Sensor sensor) {
-        String[] columns = {"id", "type", "threshold", "samplingRate"};
+        String[] columns = { "id", "locationId", "type", "threshold", "samplingRate" };
         Object[] values = {
-            sensor.getId(),
-            sensor.getType(),
-            sensor.getThreshold(),
-            sensor.getSamplingRateTicks()
+                sensor.getId(),
+                sensor.getLocationId(),
+                sensor.getType(),
+                sensor.getThreshold(),
+                sensor.getSamplingRateTicks()
         };
         db.insert(tableName, columns, values);
     }
 
     public void delete(String id) {
-        db.delete(tableName, "id=?", new Object[]{id});
+        db.delete(tableName, "id=?", new Object[] { id });
     }
 }

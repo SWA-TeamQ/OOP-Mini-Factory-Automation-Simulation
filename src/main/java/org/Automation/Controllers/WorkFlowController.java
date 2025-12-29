@@ -123,7 +123,8 @@ public class WorkFlowController {
             Machine m2 = EntityFactory.createMachine("PACKAGER", "M-02", "Boxer", "IDLE", eventBus);
 
             // 3. Create Sensors
-            Sensor s1 = EntityFactory.createSensor("S-01", "Temperature", 30.0, 10, eventBus);
+            // Decoupled: Sensor knows its location, but Station doesn't own it.
+            Sensor s1 = EntityFactory.createSensor("S-01", prod.getId(), "Temperature", 30.0, 10, eventBus);
 
             // 4. Create Conveyors
             ConveyorBelt c1 = EntityFactory.createConveyor("C-01", 5, 20, eventBus);
@@ -131,7 +132,7 @@ public class WorkFlowController {
 
             // 5. Wire them up
             prod.addMachine(m1);
-            prod.addSensor(s1);
+            // prod.addSensor(s1); // Removed: Stations do not own sensors anymore
             pack.addMachine(m2);
 
             // 6. Save to Repositories
@@ -222,5 +223,29 @@ public class WorkFlowController {
 
     public void setSimulationEngine(SimulationEngine simulationEngine) {
         this.simulationEngine = simulationEngine;
+    }
+
+    // User-Defined Configuration Methods
+    public void registerMachine(String id, String name, String typeStr, String stationId) {
+        // Enforce validations
+        org.Automation.entities.enums.MachineType type = org.Automation.entities.enums.MachineType
+                .valueOf(typeStr.toUpperCase());
+        Station station = stationRepo.findById(stationId);
+        if (station == null) {
+            throw new IllegalArgumentException("Station " + stationId + " not found.");
+        }
+
+        Machine machine = EntityFactory.createMachine(typeStr, id, name, "IDLE", eventBus);
+        station.addMachine(machine); // Checks type compatibility internally
+
+        machineRepo.save(machine);
+        // Note: station status/list persistence depends on DB structure or memory.
+        // StationRepo doesn't strictly update the list in DB if not relational.
+        // But for simulation runtime, this works.
+    }
+
+    public void registerProduct(String id) {
+        ProductItem item = EntityFactory.createProductItem(id);
+        productRepo.save(item);
     }
 }

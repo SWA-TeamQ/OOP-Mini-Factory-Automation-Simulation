@@ -1,12 +1,13 @@
 package org.Automation.entities;
 
+import org.Automation.entities.enums.StationType;
 import org.Automation.entities.enums.StationStatus;
 import org.Automation.core.EventBus;
 
 public class InputStation extends Station {
 
     public InputStation(String id, EventBus eventBus) {
-        super(id, eventBus);
+        super(id, StationType.INPUT, eventBus);
         this.status = StationStatus.ACTIVE;
     }
 
@@ -20,9 +21,10 @@ public class InputStation extends Station {
     @Override
     public void processItems() {
         // InputStation just produces items, then signals they are ready for transfer
-        for (ProductItem item : new java.util.ArrayList<>(itemsInStation)) {
+        // Note: waitingQueue is protected in base class
+        for (ProductItem item : new java.util.ArrayList<>(waitingQueue)) {
             onProductReadyForTransfer(item);
-            itemsInStation.remove(item);
+            waitingQueue.remove(item);
         }
     }
 }
