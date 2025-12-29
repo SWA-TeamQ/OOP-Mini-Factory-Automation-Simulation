@@ -46,7 +46,9 @@ public final class DatabaseManager {
     }
   }
 
+
   // ---------------- Helper method for SELECT queries ----------------
+
   private ResultSet executeQuery(String sql, Object[] params) {
     try {
       PreparedStatement pstmt = connection.prepareStatement(sql);
@@ -58,6 +60,7 @@ public final class DatabaseManager {
   }
 
   // ---------------- Helper method for INSERT, UPDATE, DELETE ----------------
+  
   private boolean executeMutator(String sql, Object[] params) {
     try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
       bindParams(pstmt, params);
@@ -131,15 +134,4 @@ public final class DatabaseManager {
     }
   }
 
-  public void shutdown() {
-    disconnect();
-  }
-
-  public void closeConnection() {
-    disconnect();
-  }
-
-  void Cleaner() {
-    disconnect();
-  }
 }

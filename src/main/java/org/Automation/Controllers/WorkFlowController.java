@@ -5,16 +5,14 @@ import org.Automation.repositories.*;
 import org.Automation.services.*;
 import org.Automation.core.EventBus;
 import org.Automation.core.Logger;
-import org.Automation.engine.SimulationClock;
 import org.Automation.engine.SimulationEngine;
 import org.Automation.core.DatabaseManager;
 import org.Automation.core.EntityFactory;
 
-import java.util.List;
-
 /**
  * Coordinates the mini factory workflow.
- * Acts as the central "Brain" that manages repositories, services, and the simulation state.
+ * Acts as the central "Brain" that manages repositories, services, and the
+ * simulation state.
  */
 public class WorkFlowController {
 
@@ -23,7 +21,6 @@ public class WorkFlowController {
     private final ProductItemRepository productRepo;
     private final ConveyorRepository conveyorRepo;
     private final SensorRepository sensorRepo;
-    private final ItemTrackingEventRepository itemTrackingEventRepo;
     private final EventBus eventBus;
     private final DatabaseManager db;
 
@@ -32,7 +29,7 @@ public class WorkFlowController {
     private final ItemTrackingService itemTrackingService;
     private final SensorService sensorService;
     private final ProductionLineService productionLineService;
-    
+
     private SimulationEngine simulationEngine;
     private boolean productionRunning = false;
 
@@ -46,23 +43,20 @@ public class WorkFlowController {
             ProductItemRepository productItemRepository,
             ConveyorRepository conveyorRepository,
             SensorRepository sensorRepository,
-            ItemTrackingEventRepository itemTrackingEventRepository,
             EventBus eventBus,
-            DatabaseManager db
-    ) {
+            DatabaseManager db) {
         this.productionLineService = productionLineService;
         this.stationRepo = stationRepository;
         this.machineRepo = machineRepository;
         this.productRepo = productItemRepository;
         this.conveyorRepo = conveyorRepository;
         this.sensorRepo = sensorRepository;
-        this.itemTrackingEventRepo = itemTrackingEventRepository;
         this.eventBus = eventBus;
         this.db = db;
 
         this.machineService = new MachineService(machineRepo, eventBus);
         this.conveyorService = new ConveyorService(conveyorRepo, eventBus);
-        this.itemTrackingService = new ItemTrackingService(productRepo, itemTrackingEventRepo, eventBus);
+        this.itemTrackingService = new ItemTrackingService(productRepo, eventBus);
         this.sensorService = new SensorService(sensorRepo, eventBus);
 
         subscribeEvents();
@@ -70,7 +64,8 @@ public class WorkFlowController {
     }
 
     /**
-     * Constructor that handles its own internal wiring (used for testing or standalone).
+     * Constructor that handles its own internal wiring (used for testing or
+     * standalone).
      */
     public WorkFlowController(
             MachineRepository machineRepo,
@@ -78,22 +73,19 @@ public class WorkFlowController {
             ProductItemRepository productRepo,
             ConveyorRepository conveyorRepo,
             SensorRepository sensorRepo,
-            ItemTrackingEventRepository itemTrackingEventRepo,
             EventBus eventBus,
-            DatabaseManager db
-    ) {
+            DatabaseManager db) {
         this.machineRepo = machineRepo;
         this.stationRepo = stationRepo;
         this.productRepo = productRepo;
         this.conveyorRepo = conveyorRepo;
         this.sensorRepo = sensorRepo;
-        this.itemTrackingEventRepo = itemTrackingEventRepo;
         this.eventBus = eventBus;
         this.db = db;
 
         this.machineService = new MachineService(machineRepo, eventBus);
         this.conveyorService = new ConveyorService(conveyorRepo, eventBus);
-        this.itemTrackingService = new ItemTrackingService(productRepo, itemTrackingEventRepo, eventBus);
+        this.itemTrackingService = new ItemTrackingService(productRepo, eventBus);
         this.sensorService = new SensorService(sensorRepo, eventBus);
 
         this.productionLineService = new ProductionLineService(
@@ -104,8 +96,7 @@ public class WorkFlowController {
                 sensorService,
                 machineService,
                 conveyorService,
-                eventBus
-        );
+                eventBus);
 
         subscribeEvents();
         seedDataIfEmpty();
@@ -121,28 +112,28 @@ public class WorkFlowController {
     private void seedDataIfEmpty() {
         if (stationRepo.findAll().isEmpty()) {
             Logger.info("Database empty. Seeding default factory layout...");
-            
+
             // 1. Create Stations
             Station input = EntityFactory.createStation("INPUT", "ST-01", "ACTIVE", eventBus);
             Station prod = EntityFactory.createStation("PRODUCTION", "ST-02", "ACTIVE", eventBus);
             Station pack = EntityFactory.createStation("PACKAGING", "ST-03", "ACTIVE", eventBus);
-            
+
             // 2. Create Machines
             Machine m1 = EntityFactory.createMachine("CUTTER", "M-01", "Drill Press", "IDLE", eventBus);
             Machine m2 = EntityFactory.createMachine("PACKAGER", "M-02", "Boxer", "IDLE", eventBus);
-            
+
             // 3. Create Sensors
             Sensor s1 = EntityFactory.createSensor("S-01", "Temperature", 30.0, 10, eventBus);
-            
+
             // 4. Create Conveyors
             ConveyorBelt c1 = EntityFactory.createConveyor("C-01", 5, 20, eventBus);
             ConveyorBelt c2 = EntityFactory.createConveyor("C-02", 5, 20, eventBus);
-            
+
             // 5. Wire them up
             prod.addMachine(m1);
             prod.addSensor(s1);
             pack.addMachine(m2);
-            
+
             // 6. Save to Repositories
             stationRepo.save(input);
             stationRepo.save(prod);
@@ -152,7 +143,7 @@ public class WorkFlowController {
             sensorRepo.save(s1);
             conveyorRepo.save(c1);
             conveyorRepo.save(c2);
-            
+
             Logger.info("Factory seeded with 3 stations, 2 machines, 1 sensor, and 2 conveyors.");
         }
     }
@@ -165,7 +156,6 @@ public class WorkFlowController {
             productRepo.ensureTableExists();
             conveyorRepo.ensureTableExists();
             sensorRepo.ensureTableExists();
-            if (itemTrackingEventRepo != null) itemTrackingEventRepo.ensureTableExists();
             Logger.warn("Factory reset complete. All data cleared.");
         }
     }
@@ -191,7 +181,8 @@ public class WorkFlowController {
     }
 
     public void runProductionStep() {
-        if (!productionRunning) return;
+        if (!productionRunning)
+            return;
 
         String id = "ITEM-" + System.currentTimeMillis();
         ProductItem item = new ProductItem(id);
@@ -201,12 +192,35 @@ public class WorkFlowController {
         Logger.info("Simulation step processed item: " + item.getId());
     }
 
-    public StationRepository getStationRepository() { return stationRepo; }
-    public MachineRepository getMachineRepository() { return machineRepo; }
-    public ProductItemRepository getProductItemRepository() { return productRepo; }
-    public ConveyorRepository getConveyorRepository() { return conveyorRepo; }
-    public SensorRepository getSensorRepository() { return sensorRepo; }
-    public EventBus getEventBus() { return eventBus; }
-    public boolean isProductionRunning() { return productionRunning; }
-    public void setSimulationEngine(SimulationEngine simulationEngine) { this.simulationEngine = simulationEngine; }
+    public StationRepository getStationRepository() {
+        return stationRepo;
+    }
+
+    public MachineRepository getMachineRepository() {
+        return machineRepo;
+    }
+
+    public ProductItemRepository getProductItemRepository() {
+        return productRepo;
+    }
+
+    public ConveyorRepository getConveyorRepository() {
+        return conveyorRepo;
+    }
+
+    public SensorRepository getSensorRepository() {
+        return sensorRepo;
+    }
+
+    public EventBus getEventBus() {
+        return eventBus;
+    }
+
+    public boolean isProductionRunning() {
+        return productionRunning;
+    }
+
+    public void setSimulationEngine(SimulationEngine simulationEngine) {
+        this.simulationEngine = simulationEngine;
+    }
 }
