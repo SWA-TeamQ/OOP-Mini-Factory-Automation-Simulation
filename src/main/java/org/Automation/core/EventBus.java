@@ -1,7 +1,8 @@
-package org.Automation.core;
+package org.automation.core;
 
-import org.Automation.events.*;
 import java.util.*;
+
+import org.automation.events.*;
 
 public class EventBus {
     private final HashMap<String, List<EventSubscriber>> listeners = new HashMap<>();

@@ -1,8 +1,6 @@
-package org.Automation.ui;
+package org.automation.ui;
 
-import org.Automation.Controllers.WorkFlowController;
-// import org.Automation.repositories.*;
-// import org.Automation.core.EventBus;
+import org.automation.controllers.WorkFlowController;
 
 public class ConsoleApp {
     private WorkFlowController controller;

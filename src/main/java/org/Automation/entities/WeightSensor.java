@@ -1,7 +1,7 @@
-package org.Automation.entities;
+package org.automation.entities;
 
-import org.Automation.core.*;
-import org.Automation.events.*;
+import org.automation.core.*;
+import org.automation.events.*;
 
 /**
  * Weight sensor that monitors product weight.

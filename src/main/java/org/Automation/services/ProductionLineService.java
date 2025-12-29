@@ -1,14 +1,14 @@
-package org.Automation.services;
-
-import org.Automation.entities.*;
-import org.Automation.entities.enums.StationType;
-import org.Automation.repositories.*;
-import org.Automation.core.EventBus;
-import org.Automation.core.Logger;
+package org.automation.services;
 
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.automation.core.EventBus;
+import org.automation.core.Logger;
+import org.automation.entities.*;
+import org.automation.entities.enums.StationType;
+import org.automation.repositories.*;
 
 /**
  * Orchestrates the flow of products through the production line.
@@ -191,7 +191,7 @@ public class ProductionLineService implements IProductionLineService {
         // Notify sensors that this product is now being processed at this station
         notifySensorsProductStart(item.getId(), to.getId());
 
-        long tick = org.Automation.engine.SimulationClock.getInstance().getLogicalTick();
+        long tick = org.automation.engine.SimulationClock.getInstance().getLogicalTick();
         Logger.info(String.format(
                 "[Tick %d] [Instant Transfer] Item %s moved instantly from %s to %s to assign to idle machine.",
                 tick, item.getId(), from.getId(), to.getId()));
@@ -256,7 +256,7 @@ public class ProductionLineService implements IProductionLineService {
 
                 nextStation.onProductArrived(item);
 
-                long tick = org.Automation.engine.SimulationClock.getInstance().getLogicalTick();
+                long tick = org.automation.engine.SimulationClock.getInstance().getLogicalTick();
                 if (nextStation.getType() == StationType.PACKAGING) {
                     Logger.info(String.format("[Tick %d] [UI] Product %s reached Packaging Machine at Station %s",
                             tick, item.getId(), nextStation.getId()));

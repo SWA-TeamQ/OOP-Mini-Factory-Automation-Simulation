@@ -1,7 +1,7 @@
-package org.Automation.ui.helpers;
+package org.automation.ui.helpers;
 
-import org.Automation.entities.Machine;
-import org.Automation.repositories.MachineRepository;
+import org.automation.entities.Machine;
+import org.automation.repositories.MachineRepository;
 
 public class StatusView {
     private final MachineRepository machineRepo;

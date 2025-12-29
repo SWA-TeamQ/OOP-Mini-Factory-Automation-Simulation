@@ -1,6 +1,6 @@
-package org.Automation.engine;
+package org.automation.engine;
 
-import org.Automation.Controllers.WorkFlowController;
+import org.automation.controllers.WorkFlowController;
 
 public class SimulationEngine {
 

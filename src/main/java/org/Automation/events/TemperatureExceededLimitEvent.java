@@ -1,4 +1,4 @@
-package org.Automation.events;
+package org.automation.events;
 
 /**
  * Raised when temperature measurement exceeds the threshold.

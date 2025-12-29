@@ -1,14 +1,16 @@
-package org.Automation.repositories;
+package org.automation.repositories;
 
-import org.Automation.core.DatabaseManager;
-import org.Automation.core.EntityFactory;
-import org.Automation.core.EventBus;
-import org.Automation.entities.Station;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.automation.core.DatabaseManager;
+import org.automation.core.EntityFactory;
+import org.automation.core.EventBus;
+import org.automation.entities.Station;
+
 import java.util.ArrayList;
 
 public class StationRepository extends Repository<Station> {

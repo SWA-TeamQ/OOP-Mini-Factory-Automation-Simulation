@@ -1,4 +1,4 @@
-package org.Automation.engine;
+package org.automation.engine;
 
 /**
  * Interface for components that need to react to the simulation clock.

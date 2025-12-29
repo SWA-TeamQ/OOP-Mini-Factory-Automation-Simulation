@@ -1,10 +1,10 @@
-package org.Automation.services;
+package org.automation.services;
 
-import org.Automation.entities.Machine;
+import org.automation.entities.Machine;
 
 public interface IMachineService {
     void startMachine(String machineId);
     void stopMachine(String machineId);
-    void processItem(String machineId, org.Automation.entities.ProductItem item);
+    void processItem(String machineId, org.automation.entities.ProductItem item);
     Machine getMachine(String machineId);
 }

@@ -1,6 +1,6 @@
-package org.Automation.core;
+package org.automation.core;
 
-import org.Automation.events.Event;
+import org.automation.events.Event;
 
 public interface EventSubscriber {
     void onEvent(Event event);

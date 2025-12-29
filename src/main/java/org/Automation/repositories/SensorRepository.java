@@ -1,11 +1,12 @@
-package org.Automation.repositories;
+package org.automation.repositories;
 
-import org.Automation.core.DatabaseManager;
-import org.Automation.core.EntityFactory;
-import org.Automation.core.EventBus;
-import org.Automation.entities.Sensor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import org.automation.core.DatabaseManager;
+import org.automation.core.EntityFactory;
+import org.automation.core.EventBus;
+import org.automation.entities.Sensor;
 
 public class SensorRepository extends Repository<Sensor> {
     private final EventBus eventBus;

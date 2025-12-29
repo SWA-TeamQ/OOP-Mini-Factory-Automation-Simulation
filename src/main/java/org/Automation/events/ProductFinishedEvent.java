@@ -1,4 +1,4 @@
-package org.Automation.events;
+package org.automation.events;
 
 /**
  * Raised when a product completes the entire production line.

@@ -1,7 +1,7 @@
-package org.Automation.entities;
+package org.automation.entities;
 
-import org.Automation.core.*;
-import org.Automation.events.*;
+import org.automation.core.*;
+import org.automation.events.*;
 
 /**
  * Temperature sensor that monitors product temperature.

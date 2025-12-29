@@ -1,6 +1,6 @@
-package org.Automation.events;
+package org.automation.events;
 
-import org.Automation.engine.SimulationClock;
+import org.automation.engine.SimulationClock;
 
 /**
  * Base class for all events in the system.

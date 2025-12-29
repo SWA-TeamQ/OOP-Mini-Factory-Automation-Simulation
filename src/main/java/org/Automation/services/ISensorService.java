@@ -1,6 +1,6 @@
-package org.Automation.services;
+package org.automation.services;
 
-import org.Automation.entities.Sensor;
+import org.automation.entities.Sensor;
 
 public interface ISensorService {
     void readSensor(Sensor sensor);

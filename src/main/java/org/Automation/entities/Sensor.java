@@ -1,10 +1,10 @@
-package org.Automation.entities;
-
-import org.Automation.core.EventBus;
-import org.Automation.engine.SimulationClock;
-import org.Automation.engine.Tickable;
+package org.automation.entities;
 
 import java.util.Random;
+
+import org.automation.core.EventBus;
+import org.automation.engine.SimulationClock;
+import org.automation.engine.Tickable;
 
 /**
  * Represents a physical sensor monitoring the production line.
@@ -69,7 +69,7 @@ public abstract class Sensor implements Tickable {
             // Real-time sensor display during processing (limited to 5 logs)
             if (logCount < MAX_LOGS_PER_PRODUCT) {
                 logCount++;
-                org.Automation.core.Logger
+                org.automation.core.Logger
                         .info(String.format("[Tick %d] [Sensor %s] Product %s | %s: %.2f (Threshold: %.2f) [Log %d/%d]",
                                 currentTick, id, currentProductId, type, lastValue, threshold, logCount,
                                 MAX_LOGS_PER_PRODUCT));

@@ -1,7 +1,8 @@
-package org.Automation.ui.helpers;
+package org.automation.ui.helpers;
 
-import org.Automation.entities.ProductItem;
 import java.util.List;
+
+import org.automation.entities.ProductItem;
 
 public class TableView {
 

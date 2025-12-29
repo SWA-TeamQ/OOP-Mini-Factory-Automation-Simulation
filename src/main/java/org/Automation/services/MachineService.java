@@ -1,10 +1,10 @@
-package org.Automation.services;
+package org.automation.services;
 
-import org.Automation.entities.Machine;
-import org.Automation.entities.ProductItem;
-import org.Automation.repositories.MachineRepository;
-import org.Automation.core.EventBus;
-import org.Automation.core.Logger;
+import org.automation.core.EventBus;
+import org.automation.core.Logger;
+import org.automation.entities.Machine;
+import org.automation.entities.ProductItem;
+import org.automation.repositories.MachineRepository;
 
 public class MachineService implements IMachineService {
     private final MachineRepository machineRepo;

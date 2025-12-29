@@ -1,7 +1,7 @@
-package org.Automation.core;
+package org.automation.core;
 
-import org.Automation.entities.*;
-import org.Automation.entities.enums.*;
+import org.automation.entities.*;
+import org.automation.entities.enums.*;
 
 /**
  * Factory Pattern implementation to centralize object creation.

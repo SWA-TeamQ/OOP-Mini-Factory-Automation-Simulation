@@ -1,6 +1,6 @@
-package org.Automation.services;
+package org.automation.services;
 
-import org.Automation.entities.ProductItem;
+import org.automation.entities.ProductItem;
 
 public interface IItemTrackingService {
     void registerItem(ProductItem item);

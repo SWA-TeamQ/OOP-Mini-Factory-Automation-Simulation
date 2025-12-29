@@ -1,7 +1,7 @@
-package org.Automation.entities;
+package org.automation.entities;
 
-import org.Automation.entities.enums.*;
-import org.Automation.core.*;
+import org.automation.core.*;
+import org.automation.entities.enums.*;
 
 public class PackagingStation extends Station {
 

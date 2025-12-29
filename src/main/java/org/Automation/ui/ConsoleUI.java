@@ -1,11 +1,11 @@
-package org.Automation.ui;
-
-import org.Automation.Controllers.WorkFlowController;
-import org.Automation.ui.helpers.EventLog;
-import org.Automation.ui.helpers.FactorySnapshotView;
-import org.Automation.ui.helpers.StatusView;
+package org.automation.ui;
 
 import java.util.Scanner;
+
+import org.automation.controllers.WorkFlowController;
+import org.automation.ui.helpers.EventLog;
+import org.automation.ui.helpers.FactorySnapshotView;
+import org.automation.ui.helpers.StatusView;
 
 public class ConsoleUI {
     private final WorkFlowController controller;

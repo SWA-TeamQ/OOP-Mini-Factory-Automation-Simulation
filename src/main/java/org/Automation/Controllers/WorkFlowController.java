@@ -1,11 +1,11 @@
-package org.Automation.Controllers;
+package org.automation.controllers;
 
-import org.Automation.events.*;
-import org.Automation.entities.*;
-import org.Automation.repositories.*;
-import org.Automation.services.*;
-import org.Automation.core.*;
-import org.Automation.engine.*;
+import org.automation.core.*;
+import org.automation.engine.*;
+import org.automation.entities.*;
+import org.automation.events.*;
+import org.automation.repositories.*;
+import org.automation.services.*;
 
 /**
  * Coordinates the mini factory workflow.
@@ -242,7 +242,7 @@ public class WorkFlowController {
     // User-Defined Configuration Methods
     public void registerMachine(String id, String name, String typeStr) {
         // Enforce validations
-        org.Automation.entities.enums.MachineType type = org.Automation.entities.enums.MachineType
+        org.automation.entities.enums.MachineType type = org.automation.entities.enums.MachineType
                 .valueOf(typeStr.toUpperCase());
 
         // Find matching station

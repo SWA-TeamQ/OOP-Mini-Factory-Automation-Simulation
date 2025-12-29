@@ -1,8 +1,8 @@
-package org.Automation.services;
+package org.automation.services;
 
-import org.Automation.entities.*;
-import org.Automation.repositories.*;
-import org.Automation.core.*;
+import org.automation.core.*;
+import org.automation.entities.*;
+import org.automation.repositories.*;
 
 public class ConveyorService implements IConveyorService {
     private final ConveyorRepository conveyorRepo;

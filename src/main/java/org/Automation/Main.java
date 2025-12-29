@@ -1,13 +1,13 @@
-package org.Automation;
+package org.automation;
 
-import org.Automation.Controllers.WorkFlowController;
-import org.Automation.core.DatabaseManager;
-import org.Automation.core.EventBus;
-import org.Automation.core.Logger;
-import org.Automation.engine.SimulationEngine;
-import org.Automation.repositories.*;
-import org.Automation.services.*;
-import org.Automation.ui.ConsoleApp;
+import org.automation.controllers.WorkFlowController;
+import org.automation.core.DatabaseManager;
+import org.automation.core.EventBus;
+import org.automation.core.Logger;
+import org.automation.engine.SimulationEngine;
+import org.automation.repositories.*;
+import org.automation.services.*;
+import org.automation.ui.ConsoleApp;
 
 /**
  * Entry point of the Mini Factory Simulation Automation system.

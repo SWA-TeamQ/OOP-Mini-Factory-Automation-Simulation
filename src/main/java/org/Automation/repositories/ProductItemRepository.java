@@ -1,9 +1,10 @@
-package org.Automation.repositories;
+package org.automation.repositories;
 
-import org.Automation.core.DatabaseManager;
-import org.Automation.entities.ProductItem;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import org.automation.core.DatabaseManager;
+import org.automation.entities.ProductItem;
 
 /**
  * Repository for ProductItem entities.

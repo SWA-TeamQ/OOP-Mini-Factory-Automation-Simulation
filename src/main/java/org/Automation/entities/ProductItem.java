@@ -1,4 +1,4 @@
-package org.Automation.entities;
+package org.automation.entities;
 
 import java.util.ArrayList;
 import java.util.List;

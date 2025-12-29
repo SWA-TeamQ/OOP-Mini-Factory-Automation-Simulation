@@ -1,8 +1,8 @@
-package org.Automation.entities;
+package org.automation.entities;
 
-import org.Automation.entities.enums.StationType;
-import org.Automation.entities.enums.StationStatus;
-import org.Automation.core.EventBus;
+import org.automation.core.EventBus;
+import org.automation.entities.enums.StationStatus;
+import org.automation.entities.enums.StationType;
 
 public class ProductionStation extends Station {
 

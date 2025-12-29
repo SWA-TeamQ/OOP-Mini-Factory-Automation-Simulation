@@ -1,6 +1,6 @@
-package org.Automation.entities;
+package org.automation.entities;
 
-import org.Automation.entities.enums.MachineType;
+import org.automation.entities.enums.MachineType;
 
 public class PackagingMachine extends Machine {
 

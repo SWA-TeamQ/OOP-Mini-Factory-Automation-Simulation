@@ -1,4 +1,4 @@
-package org.Automation.ui.helpers;
+package org.automation.ui.helpers;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

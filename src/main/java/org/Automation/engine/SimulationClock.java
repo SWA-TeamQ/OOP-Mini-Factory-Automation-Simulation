@@ -1,4 +1,4 @@
-package org.Automation.engine;
+package org.automation.engine;
 
 import java.time.LocalDateTime;
 import java.util.List;

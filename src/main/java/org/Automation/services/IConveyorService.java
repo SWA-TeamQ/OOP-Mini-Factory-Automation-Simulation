@@ -1,7 +1,7 @@
-package org.Automation.services;
+package org.automation.services;
 
-import org.Automation.entities.ConveyorBelt;
-import org.Automation.entities.ProductItem;
+import org.automation.entities.ConveyorBelt;
+import org.automation.entities.ProductItem;
 
 public interface IConveyorService {
     void startConveyor(String conveyorId);

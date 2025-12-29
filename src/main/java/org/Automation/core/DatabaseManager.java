@@ -1,4 +1,4 @@
-package org.Automation.core;
+package org.automation.core;
 
 import java.sql.*;
 

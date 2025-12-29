@@ -1,10 +1,10 @@
-package org.Automation.services;
+package org.automation.services;
 
-import org.Automation.entities.*;
-import org.Automation.events.*;
-import org.Automation.repositories.*;
-import org.Automation.core.*;
-import org.Automation.engine.SimulationClock;
+import org.automation.core.*;
+import org.automation.engine.SimulationClock;
+import org.automation.entities.*;
+import org.automation.events.*;
+import org.automation.repositories.*;
 
 /**
  * Tracks product items through the production line.

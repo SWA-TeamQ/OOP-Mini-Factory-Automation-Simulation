@@ -1,9 +1,10 @@
-package org.Automation.entities;
+package org.automation.entities;
 
-import org.Automation.entities.enums.*;
-import org.Automation.core.*;
-import org.Automation.events.*;
 import java.util.*;
+
+import org.automation.core.*;
+import org.automation.entities.enums.*;
+import org.automation.events.*;
 
 /**
  * Represents a physical location in the production line.

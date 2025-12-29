@@ -1,11 +1,11 @@
-package org.Automation.entities;
-
-import org.Automation.core.*;
-import org.Automation.engine.*;
-import org.Automation.entities.enums.*;
-import org.Automation.repositories.ProductItemRepository;
+package org.automation.entities;
 
 import java.util.Random;
+
+import org.automation.core.*;
+import org.automation.engine.*;
+import org.automation.entities.enums.*;
+import org.automation.repositories.ProductItemRepository;
 
 /**
  * Represents a physical machine in the factory.

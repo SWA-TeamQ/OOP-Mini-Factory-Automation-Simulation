@@ -1,13 +1,13 @@
-package org.Automation.entities;
-
-import org.Automation.engine.Tickable;
-import org.Automation.engine.SimulationClock;
-import org.Automation.core.Logger;
+package org.automation.entities;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Iterator;
 import java.util.function.Consumer;
+
+import org.automation.core.Logger;
+import org.automation.engine.SimulationClock;
+import org.automation.engine.Tickable;
 
 /**
  * Represents a physical conveyor belt connecting two stations.

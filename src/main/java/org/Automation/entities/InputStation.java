@@ -1,8 +1,8 @@
-package org.Automation.entities;
+package org.automation.entities;
 
-import org.Automation.entities.enums.StationType;
-import org.Automation.entities.enums.StationStatus;
-import org.Automation.core.EventBus;
+import org.automation.core.EventBus;
+import org.automation.entities.enums.StationStatus;
+import org.automation.entities.enums.StationType;
 
 public class InputStation extends Station {
 
@@ -33,6 +33,6 @@ public class InputStation extends Station {
         // Logic should be handled by polling or direct assignment if applicable.
         // For now, we log that it's ready. The ProductionLineService likely picks it
         // up.
-        org.Automation.core.Logger.info("InputStation: Product " + item.getId() + " ready for transfer.");
+        org.automation.core.Logger.info("InputStation: Product " + item.getId() + " ready for transfer.");
     }
 }

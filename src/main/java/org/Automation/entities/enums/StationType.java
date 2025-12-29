@@ -1,4 +1,4 @@
-package org.Automation.entities.enums;
+package org.automation.entities.enums;
 
 public enum StationType {
     INPUT,
