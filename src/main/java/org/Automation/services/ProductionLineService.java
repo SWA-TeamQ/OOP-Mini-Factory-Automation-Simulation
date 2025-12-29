@@ -193,7 +193,15 @@ public class ProductionLineService implements IProductionLineService {
                 }
 
                 nextStation.onProductArrived(item);
-                Logger.info("Item " + item.getId() + " arrived at station " + nextStation.getId());
+
+                long tick = org.Automation.engine.SimulationClock.getInstance().getLogicalTick();
+                if (nextStation.getType() == StationType.PACKAGING) {
+                    Logger.info(String.format("[Tick %d] [UI] Product %s reached Packaging Machine at Station %s",
+                            tick, item.getId(), nextStation.getId()));
+                } else {
+                    Logger.info(String.format("[Tick %d] Item %s arrived at station %s",
+                            tick, item.getId(), nextStation.getId()));
+                }
             }
         }
     }

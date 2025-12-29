@@ -73,7 +73,8 @@ public class ItemTrackingService implements IItemTrackingService {
                 currentTick,
                 item.getTotalDuration()));
 
-        Logger.info("Item " + item.getId() + " completed. Duration: " + item.getTotalDuration() + " ticks");
+        Logger.info(String.format("[Tick %d] [UI] Product %s finished full production cycle. Total Duration: %d ticks.",
+                currentTick, item.getId(), item.getTotalDuration()));
     }
 
     /**

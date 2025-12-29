@@ -2,7 +2,7 @@ package org.Automation.entities.enums;
 
 public enum MachineStatus {
     IDLE,
-    BUSY,
+    PROCESSING,
     STOPPED,
     ERROR
 }

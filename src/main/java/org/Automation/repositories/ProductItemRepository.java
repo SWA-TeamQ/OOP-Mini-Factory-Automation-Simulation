@@ -16,6 +16,25 @@ public class ProductItemRepository extends Repository<ProductItem> {
     }
 
     @Override
+    public void ensureTableExists() {
+        super.ensureTableExists();
+        tryAddColumn("completed", "INTEGER DEFAULT 0");
+        tryAddColumn("defective", "INTEGER DEFAULT 0");
+        tryAddColumn("startTick", "INTEGER DEFAULT 0");
+        tryAddColumn("endTick", "INTEGER DEFAULT 0");
+        tryAddColumn("totalDuration", "INTEGER DEFAULT 0");
+    }
+
+    private void tryAddColumn(String colName, String typeDef) {
+        try (java.sql.Statement stmt = db.getConnection().createStatement()) {
+            stmt.execute("ALTER TABLE " + tableName + " ADD COLUMN " + colName + " " + typeDef);
+        } catch (SQLException e) {
+            // Ignore if column exists or other specific error
+            // SQLite error for duplicate column is usually "duplicate column name: ..."
+        }
+    }
+
+    @Override
     public String createTableQuery() {
         return """
                 CREATE TABLE IF NOT EXISTS ProductItem (

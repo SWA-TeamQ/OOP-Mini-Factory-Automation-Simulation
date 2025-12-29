@@ -199,7 +199,8 @@ public class WorkFlowController {
 
         String id = "ITEM-" + System.currentTimeMillis();
         ProductItem item = new ProductItem(id);
-        productRepo.save(item);
+        // productRepo.save(item); // Handled by productionLineService.process ->
+        // itemTrackingService.registerItem
 
         productionLineService.process(item);
         Logger.info("Simulation step processed item: " + item.getId());
@@ -264,6 +265,19 @@ public class WorkFlowController {
 
     public void registerProduct(String id) {
         ProductItem item = EntityFactory.createProductItem(id);
-        productRepo.save(item);
+        // Ensure manual items enter the production logic
+        if (productionRunning) {
+            productionLineService.process(item);
+            Logger.info("Manual Product " + id + " added to production line.");
+        } else {
+            // If not running, just save it? Or should we queue it?
+            // Requirement says "Call startTick() when the product enters production".
+            // If we just save, it has startTick=0.
+            // Best to just allow it to "process" which sets startTick and queues it at
+            // first station.
+            // Even if machines are stopped, it will sit in queue.
+            productionLineService.process(item);
+            Logger.info("Manual Product " + id + " added to production line (queued).");
+        }
     }
 }

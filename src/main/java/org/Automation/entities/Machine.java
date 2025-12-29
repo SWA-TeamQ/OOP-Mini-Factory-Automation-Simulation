@@ -87,9 +87,16 @@ public class Machine implements Tickable {
      */
     public boolean assignItem(ProductItem item) {
         if (status == MachineStatus.IDLE && currentItem == null) {
+            MachineStatus oldStatus = this.status;
             this.currentItem = item;
-            this.status = MachineStatus.BUSY;
+            this.status = MachineStatus.PROCESSING;
             this.processingTicksRemaining = totalProcessingTicks + random.nextInt(10);
+
+            // UI Feedback: Status Change & Start Processing
+            long tick = SimulationClock.getInstance().getLogicalTick();
+            Logger.info(String.format("[Tick %d] Machine %s status changed: %s -> %s (Product: %s)",
+                    tick, id, oldStatus, this.status, item.getId()));
+
             return true;
         }
         return false;
@@ -97,7 +104,7 @@ public class Machine implements Tickable {
 
     @Override
     public void tick(long currentTick) {
-        if (status != MachineStatus.BUSY || currentItem == null) {
+        if (status != MachineStatus.PROCESSING || currentItem == null) {
             return;
         }
 
@@ -118,10 +125,16 @@ public class Machine implements Tickable {
      * Machine failure: stop simulation, mark product defective, terminate.
      */
     private void handleFailure() {
+        MachineStatus oldStatus = this.status;
+        this.status = MachineStatus.ERROR;
+        // ... logging ...
         String errorMessage = "MACHINE FAILURE: Machine " + id + " failed during processing of " + currentItem.getId();
 
         // 1. Log error to file
         Logger.error(errorMessage);
+        Logger.error(String.format("[Tick %d] Machine %s status changed: %s -> %s (Product: %s)",
+                SimulationClock.getInstance().getLogicalTick(), id, oldStatus, this.status, currentItem.getId()));
+
         System.err.println(errorMessage);
 
         // 2. Mark current product as DEFECTIVE
@@ -143,13 +156,19 @@ public class Machine implements Tickable {
 
     private void completeProcessing() {
         ProductItem finishedItem = this.currentItem;
+        long currentTick = SimulationClock.getInstance().getLogicalTick();
+        MachineStatus oldStatus = this.status;
 
         // State update FIRST
         this.status = MachineStatus.IDLE;
         this.currentItem = null;
 
+        // UI Feedback: Status Change & Late Log
+        Logger.info(String.format("[Tick %d] Machine %s status changed: %s -> %s (Product: %s)",
+                currentTick, id, oldStatus, this.status, finishedItem.getId()));
+
         finishedItem.addHistory(
-                "Processed by " + type + " [" + id + "] at tick " + SimulationClock.getInstance().getLogicalTick());
+                "Processed by " + type + " [" + id + "] at tick " + currentTick);
 
         // Notify via callback (no events)
         if (onProcessingComplete != null) {
