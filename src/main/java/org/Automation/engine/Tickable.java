@@ -1,4 +1,4 @@
-package org.Automation.core;
+package org.Automation.engine;
 
 /**
  * Interface for components that need to react to the simulation clock.
@@ -6,6 +6,7 @@ package org.Automation.core;
 public interface Tickable {
     /**
      * Called on every tick of the simulation clock.
+     * 
      * @param currentTick The current logical time step.
      */
     void tick(long currentTick);

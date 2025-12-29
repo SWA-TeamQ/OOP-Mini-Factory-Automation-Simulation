@@ -1,10 +1,9 @@
 package org.Automation.entities.enums;
 
 public enum MachineType {
-    CUTTER(StationType.PROCESSING),
-    ASSEMBLER(StationType.PROCESSING),
-    PACKAGER(StationType.PACKAGING),
-    INSPECTOR(StationType.PROCESSING);
+    INPUT(StationType.INPUT),
+    PROCESSING(StationType.PROCESSING),
+    PACKAGING(StationType.PACKAGING);
 
     private final StationType stationType;
 

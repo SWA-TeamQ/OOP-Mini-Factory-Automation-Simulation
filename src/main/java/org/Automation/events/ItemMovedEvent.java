@@ -7,7 +7,7 @@ import java.time.Instant;
  * Used by tracking/logging systems to record movement history without tightly
  * coupling to ProductionLineService.
  */
-public class ItemMovedEvent {
+public class ItemMovedEvent extends Event {
     private final String itemId;
     private final String stationId;
     private final String machineId;
@@ -18,6 +18,7 @@ public class ItemMovedEvent {
     }
 
     public ItemMovedEvent(String itemId, String stationId, String machineId, String timestamp) {
+        super("item_moved", itemId);
         this.itemId = itemId;
         this.stationId = stationId;
         this.machineId = machineId;
@@ -42,8 +43,7 @@ public class ItemMovedEvent {
 
     @Override
     public String toString() {
-        return "ItemMovedEvent{itemId='" + itemId + "', stationId='" + stationId + "', machineId='" + machineId + "', timestamp='" + timestamp + "'}";
+        return "ItemMovedEvent{itemId='" + itemId + "', stationId='" + stationId + "', machineId='" + machineId
+                + "', timestamp='" + timestamp + "'}";
     }
 }
-
-

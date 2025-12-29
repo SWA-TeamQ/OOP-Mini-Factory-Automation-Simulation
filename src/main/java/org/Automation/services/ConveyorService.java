@@ -1,10 +1,9 @@
 package org.Automation.services;
 
-import org.Automation.entities.ConveyorBelt;
-import org.Automation.entities.ProductItem;
-import org.Automation.repositories.ConveyorRepository;
-import org.Automation.core.EventBus;
-import org.Automation.core.Logger;
+import org.Automation.entities.*;
+import org.Automation.repositories.*;
+import org.Automation.core.*;
+import org.Automation.events.*;
 
 public class ConveyorService implements IConveyorService {
     private final ConveyorRepository conveyorRepo;
@@ -20,7 +19,7 @@ public class ConveyorService implements IConveyorService {
         ConveyorBelt conveyor = conveyorRepo.findById(conveyorId);
         if (conveyor != null) {
             // Logic to start conveyor (e.g. setting a status if added later)
-            eventBus.publish("conveyor_started", conveyorId);
+            eventBus.publish(new ConveyorEvent("conveyor_started", conveyorId));
             Logger.info("Conveyor " + conveyorId + " started.");
         }
     }
@@ -29,7 +28,7 @@ public class ConveyorService implements IConveyorService {
     public void stopConveyor(String conveyorId) {
         ConveyorBelt conveyor = conveyorRepo.findById(conveyorId);
         if (conveyor != null) {
-            eventBus.publish("conveyor_stopped", conveyorId);
+            eventBus.publish(new ConveyorEvent("conveyor_stopped", conveyorId));
             Logger.info("Conveyor " + conveyorId + " stopped.");
         }
     }
@@ -37,7 +36,8 @@ public class ConveyorService implements IConveyorService {
     public void moveItem(String conveyorId, ConveyorBelt conveyor, ProductItem item) {
         // Logic to move item on conveyor
         if (conveyor.addItem(item)) {
-            eventBus.publish("item_on_conveyor", "Item " + item.getId() + " moved to conveyor " + conveyorId);
+            eventBus.publish(new org.Automation.events.ConveyorEvent("item_on_conveyor",
+                    "Item " + item.getId() + " moved to conveyor " + conveyorId));
         }
     }
 

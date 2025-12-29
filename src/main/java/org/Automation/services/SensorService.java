@@ -1,8 +1,9 @@
 package org.Automation.services;
 
-import org.Automation.entities.Sensor;
-import org.Automation.repositories.SensorRepository;
-import org.Automation.core.EventBus;
+import org.Automation.entities.*;
+import org.Automation.repositories.*;
+import org.Automation.core.*;
+import org.Automation.events.*;
 
 public class SensorService implements ISensorService {
 
@@ -17,6 +18,6 @@ public class SensorService implements ISensorService {
     @Override
     public void readSensor(Sensor sensor) {
         sensorRepo.save(sensor);
-        eventBus.publish("sensor_read", sensor);
+        eventBus.publish(new SensorEvent("sensor_read", sensor));
     }
 }

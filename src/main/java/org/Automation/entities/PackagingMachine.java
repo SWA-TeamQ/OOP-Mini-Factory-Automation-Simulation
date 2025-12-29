@@ -6,6 +6,6 @@ import org.Automation.core.EventBus;
 public class PackagingMachine extends Machine {
 
     public PackagingMachine(String id, EventBus eventBus) {
-        super(id, MachineType.PACKAGER, eventBus);
+        super(id, MachineType.PACKAGING, eventBus);
     }
 }

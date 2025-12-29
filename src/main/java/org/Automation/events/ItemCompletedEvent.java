@@ -5,7 +5,7 @@ import java.time.Instant;
 /**
  * Payload published on the EventBus when a ProductItem is marked as completed.
  */
-public class ItemCompletedEvent {
+public class ItemCompletedEvent extends Event {
     private final String itemId;
     private final String timestamp;
 
@@ -14,6 +14,7 @@ public class ItemCompletedEvent {
     }
 
     public ItemCompletedEvent(String itemId, String timestamp) {
+        super("item_completed", itemId);
         this.itemId = itemId;
         this.timestamp = timestamp;
     }

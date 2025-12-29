@@ -1,11 +1,9 @@
 package org.Automation.services;
 
-import org.Automation.entities.ProductItem;
-import org.Automation.events.ItemMovedEvent;
-import org.Automation.events.ItemRegisteredEvent;
-import org.Automation.events.ItemCompletedEvent;
-import org.Automation.repositories.ProductItemRepository;
-import org.Automation.core.EventBus;
+import org.Automation.entities.*;
+import org.Automation.events.*;
+import org.Automation.repositories.*;
+import org.Automation.core.*;
 
 public class ItemTrackingService implements IItemTrackingService {
 
@@ -18,9 +16,12 @@ public class ItemTrackingService implements IItemTrackingService {
 
         // Subscribe once: whenever ProductionLineService publishes item_moved, we
         // update memory state.
-        this.eventBus.subscribe("item_moved", payload -> {
-            if (payload instanceof ItemMovedEvent moved) {
-                onItemMoved(moved);
+        this.eventBus.subscribe("item_moved", new EventSubscriber() {
+            @Override
+            public void onEvent(Event payload) {
+                if (payload instanceof ItemMovedEvent moved) {
+                    onItemMoved(moved);
+                }
             }
         });
     }
@@ -28,14 +29,14 @@ public class ItemTrackingService implements IItemTrackingService {
     @Override
     public void registerItem(ProductItem item) {
         productRepo.save(item);
-        eventBus.publish("item_registered", new ItemRegisteredEvent(item.getId()));
+        eventBus.publish(new ItemRegisteredEvent(item.getId()));
     }
 
     @Override
     public void markCompleted(ProductItem item) {
         item.setCompleted(true);
         productRepo.save(item);
-        eventBus.publish("item_completed", new ItemCompletedEvent(item.getId()));
+        eventBus.publish(new ItemCompletedEvent(item.getId()));
     }
 
     private void onItemMoved(ItemMovedEvent moved) {

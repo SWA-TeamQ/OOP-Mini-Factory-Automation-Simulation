@@ -92,13 +92,12 @@ public class ConsoleUI {
         String id = scanner.nextLine();
         System.out.print("Enter Machine Name: ");
         String name = scanner.nextLine();
-        System.out.print("Enter Machine Type (CUTTER/ASSEMBLER/PACKAGER): ");
+        System.out.print("Enter Machine Type (INPUT/PROCESSING/PACKAGING): ");
         String type = scanner.nextLine();
-        System.out.print("Enter Target Station ID (ST-01/ST-02/ST-03): ");
-        String stationId = scanner.nextLine();
+        // Station is automatically inferred
 
         try {
-            controller.registerMachine(id, name, type, stationId);
+            controller.registerMachine(id, name, type);
             System.out.println("Machine registered successfully.");
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());

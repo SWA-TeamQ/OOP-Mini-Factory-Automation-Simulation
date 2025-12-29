@@ -1,6 +1,5 @@
 package org.Automation.engine;
 
-import org.Automation.core.Tickable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -23,7 +22,6 @@ public class SimulationClock {
     // The interval between logical ticks in real-time milliseconds
     private final int TICK_INTERVAL_MS = 50;
 
-    private final List<ClockObserver> observers = new CopyOnWriteArrayList<>();
     private final List<Tickable> tickables = new CopyOnWriteArrayList<>();
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
@@ -39,11 +37,12 @@ public class SimulationClock {
     }
 
     private void tick() {
-        if (paused) return;
+        if (paused)
+            return;
 
         // Advance logical time
         logicalTick++;
-        
+
         // Advance simulated wall-clock time
         // Each tick represents TICK_INTERVAL_MS * speedFactor of simulated time
         currentSecond = currentSecond.plusNanos((long) TICK_INTERVAL_MS * speedFactor * 1_000_000L);
@@ -53,10 +52,6 @@ public class SimulationClock {
             tickable.tick(logicalTick);
         }
 
-        // Notify Observers (UI / Logging)
-        for (ClockObserver observer : observers) {
-            observer.onTick(currentSecond);
-        }
     }
 
     public long getLogicalTick() {
@@ -65,10 +60,6 @@ public class SimulationClock {
 
     public LocalDateTime getCurrentTime() {
         return currentSecond;
-    }
-
-    public void registerObserver(ClockObserver observer) {
-        observers.add(observer);
     }
 
     public void registerTickable(Tickable tickable) {

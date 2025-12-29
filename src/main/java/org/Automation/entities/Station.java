@@ -1,8 +1,8 @@
 package org.Automation.entities;
 
-import org.Automation.entities.enums.StationStatus;
-import org.Automation.entities.enums.StationType;
-import org.Automation.core.EventBus;
+import org.Automation.entities.enums.*;
+import org.Automation.core.*;
+import org.Automation.events.*;
 import java.util.*;
 
 /**
@@ -24,20 +24,24 @@ public abstract class Station {
         this.status = StationStatus.INACTIVE;
 
         // Subscribe to machine availability events to drive the queue
-        this.eventBus.subscribe("product_ready_for_transfer", payload -> {
-            // A machine finished. Since we don't strictly know if it was *our* machine
-            // without lookup, we just trigger processQueue() if we have waiting items.
-            // Optimization: We could check if the machine ID belongs to this station,
-            // but relying on the fact that a machine finishing *might* free up capacity
-            // is enough to trigger a check.
-            if (!waitingQueue.isEmpty()) {
-                processQueue();
+        this.eventBus.subscribe("product_ready_for_transfer", new EventSubscriber() {
+            @Override
+            public void onEvent(Event payload) {
+                // A machine finished. Since we don't strictly know if it was *our* machine
+                // without lookup, we just trigger processQueue() if we have waiting items.
+                if (!waitingQueue.isEmpty()) {
+                    processQueue();
+                }
             }
         });
     }
 
     public String getId() {
         return id;
+    }
+
+    public StationType getType() {
+        return type;
     }
 
     public void addMachine(Machine machine) {
@@ -64,7 +68,8 @@ public abstract class Station {
      * Input Gate: Called when a product enters the station.
      */
     public void onProductArrived(ProductItem item) {
-        eventBus.publish("product_arrived", "Item " + item.getId() + " arrived at station " + id);
+        eventBus.publish(new ProductEvent("product_arrived",
+                "Item " + item.getId() + " arrived at station " + id));
         waitingQueue.add(item); // Always enqueue first
         processQueue(); // Then try to process
     }
@@ -73,7 +78,7 @@ public abstract class Station {
      * Output Gate: Called when a product is ready to leave the station.
      */
     public void onProductReadyForTransfer(ProductItem item) {
-        eventBus.publish("product_ready_for_transfer", item);
+        eventBus.publish(new ProductEvent("product_ready_for_transfer", item));
     }
 
     public List<ProductItem> getItems() {
@@ -113,16 +118,7 @@ public abstract class Station {
         }
     }
 
-    public abstract void processItems(); // Keep abstract for legacy compatibility or simplify?
-    // The prompt says "Refactor processItems". usage in Subclasses invokes logic.
-    // I should probably implement the logic IN THE BASE CLASS if it's universal
-    // now.
-    // "Station Queue & Machine Assignment Rule... Each station must maintain a
-    // product queue... When a product arrives... If any machine is IDLE...".
-    // This looks like universal logic.
-    // However, InputStation just creates stuff.
-    // I'll keep abstract but rename helper to avoid clash? Or remove abstract?
-    // Let's keep abstract and call super.processQueue() in subclasses if needed, OR
-    // just move logic here.
-
+    public void processItems() {
+        processQueue();
+    }
 }

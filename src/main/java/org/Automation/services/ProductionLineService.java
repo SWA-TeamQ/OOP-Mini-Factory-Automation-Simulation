@@ -26,7 +26,7 @@ public class ProductionLineService implements IProductionLineService {
 
     // Mapping to define the physical flow: Station ID -> Next Station ID
     private final Map<String, String> flowMap = new HashMap<>();
-    
+
     // Mapping to track which item is currently where (for logical routing)
     private final Map<String, String> itemLocationMap = new HashMap<>();
 
@@ -38,8 +38,7 @@ public class ProductionLineService implements IProductionLineService {
             SensorService sensorService,
             IMachineService machineService,
             IConveyorService conveyorService,
-            EventBus eventBus
-    ) {
+            EventBus eventBus) {
         this.stationRepo = stationRepo;
         this.productRepo = productRepo;
         this.conveyorRepo = conveyorRepo;
@@ -53,17 +52,24 @@ public class ProductionLineService implements IProductionLineService {
     }
 
     private void setupEventHandlers() {
-        // When a machine finishes, the station signals the product is ready for transfer
-        eventBus.subscribe("product_ready_for_transfer", payload -> {
-            if (payload instanceof ProductItem item) {
-                handleTransfer(item);
+        // When a machine finishes, the station signals the product is ready for
+        // transfer
+        eventBus.subscribe("product_ready_for_transfer", new org.Automation.core.EventSubscriber() {
+            @Override
+            public void onEvent(org.Automation.events.Event payload) {
+                if (payload.getSource() instanceof ProductItem item) {
+                    handleTransfer(item);
+                }
             }
         });
 
         // When a conveyor delivers an item, it enters the next station
-        eventBus.subscribe("product_delivered", payload -> {
-            if (payload instanceof ProductItem item) {
-                handleArrival(item);
+        eventBus.subscribe("product_delivered", new org.Automation.core.EventSubscriber() {
+            @Override
+            public void onEvent(org.Automation.events.Event payload) {
+                if (payload.getSource() instanceof ProductItem item) {
+                    handleArrival(item);
+                }
             }
         });
     }
@@ -71,18 +77,18 @@ public class ProductionLineService implements IProductionLineService {
     @Override
     public void process(ProductItem item) {
         itemTrackingService.registerItem(item);
-        
+
         // Start the item at the first station
         List<Station> stations = stationRepo.findAll();
         if (!stations.isEmpty()) {
             Station firstStation = stations.get(0);
             itemLocationMap.put(item.getId(), firstStation.getId());
-            
+
             // Ensure machines are running
             for (Machine m : firstStation.getMachines()) {
                 machineService.startMachine(m.getId());
             }
-            
+
             firstStation.onProductArrived(item);
             Logger.info("Item " + item.getId() + " entered the production line at " + firstStation.getId());
         }
@@ -90,10 +96,12 @@ public class ProductionLineService implements IProductionLineService {
 
     private void handleTransfer(ProductItem item) {
         String currentStationId = itemLocationMap.get(item.getId());
-        if (currentStationId == null) return;
+        if (currentStationId == null)
+            return;
 
         Station currentStation = stationRepo.findById(currentStationId);
-        if (currentStation == null) return;
+        if (currentStation == null)
+            return;
 
         // Determine next station
         List<Station> stations = stationRepo.findAll();
@@ -123,7 +131,8 @@ public class ProductionLineService implements IProductionLineService {
             from.removeItem(item);
             itemLocationMap.put(item.getId(), "CONVEYOR_" + conveyor.getId() + "_TO_" + to.getId());
             conveyor.addItem(item);
-            Logger.info("Moving item " + item.getId() + " from " + from.getId() + " to " + to.getId() + " via conveyor " + conveyor.getId());
+            Logger.info("Moving item " + item.getId() + " from " + from.getId() + " to " + to.getId() + " via conveyor "
+                    + conveyor.getId());
         }
     }
 
@@ -135,12 +144,12 @@ public class ProductionLineService implements IProductionLineService {
             Station nextStation = stationRepo.findById(nextStationId);
             if (nextStation != null) {
                 itemLocationMap.put(item.getId(), nextStation.getId());
-                
+
                 // Ensure machines are running
                 for (Machine m : nextStation.getMachines()) {
                     machineService.startMachine(m.getId());
                 }
-                
+
                 nextStation.onProductArrived(item);
                 Logger.info("Item " + item.getId() + " arrived at station " + nextStation.getId());
             }

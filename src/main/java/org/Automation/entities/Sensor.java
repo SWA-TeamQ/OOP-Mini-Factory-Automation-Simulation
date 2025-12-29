@@ -1,9 +1,9 @@
 package org.Automation.entities;
 
-import org.Automation.core.EventBus;
-import org.Automation.core.Tickable;
-import org.Automation.engine.SimulationClock;
-
+import org.Automation.core.*;
+import org.Automation.engine.*;
+import org.Automation.engine.Tickable;
+import org.Automation.events.*;
 import java.util.Random;
 
 /**
@@ -58,12 +58,13 @@ public class Sensor implements Tickable {
         // Simulate a measurement (e.g., base value + noise)
         lastValue = 20.0 + random.nextDouble() * 10.0;
 
-        eventBus.publish("measurement_taken",
-                "Sensor " + id + " [" + type + "] measured: " + String.format("%.2f", lastValue));
+        eventBus.publish(new SensorEvent("measurement_taken",
+                "Sensor " + id + " [" + type + "] measured: " + String.format("%.2f", lastValue)));
 
         if (lastValue > threshold) {
-            eventBus.publish("threshold_exceeded", "ALARM: Sensor " + id + " [" + type + "] exceeded threshold! Value: "
-                    + String.format("%.2f", lastValue));
+            eventBus.publish(new SensorEvent("threshold_exceeded",
+                    "ALARM: Sensor " + id + " [" + type + "] exceeded threshold! Value: "
+                            + String.format("%.2f", lastValue)));
         }
     }
 

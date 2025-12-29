@@ -1,13 +1,11 @@
 package org.Automation.Controllers;
 
+import org.Automation.events.*;
 import org.Automation.entities.*;
 import org.Automation.repositories.*;
 import org.Automation.services.*;
-import org.Automation.core.EventBus;
-import org.Automation.core.Logger;
-import org.Automation.engine.SimulationEngine;
-import org.Automation.core.DatabaseManager;
-import org.Automation.core.EntityFactory;
+import org.Automation.core.*;
+import org.Automation.engine.*;
 
 /**
  * Coordinates the mini factory workflow.
@@ -103,10 +101,30 @@ public class WorkFlowController {
     }
 
     private void subscribeEvents() {
-        eventBus.subscribe("machine_error", payload -> Logger.error("Machine error: " + payload));
-        eventBus.subscribe("machine_started", payload -> Logger.info("Machine started: " + payload));
-        eventBus.subscribe("machine_stopped", payload -> Logger.info("Machine stopped: " + payload));
-        eventBus.subscribe("item_completed", payload -> Logger.info("Item completed: " + payload));
+        eventBus.subscribe("machine_error", new EventSubscriber() {
+            @Override
+            public void onEvent(Event event) {
+                Logger.error("Machine error: " + event.getSource());
+            }
+        });
+        eventBus.subscribe("machine_started", new EventSubscriber() {
+            @Override
+            public void onEvent(Event event) {
+                Logger.info("Machine started: " + event.getSource());
+            }
+        });
+        eventBus.subscribe("machine_stopped", new EventSubscriber() {
+            @Override
+            public void onEvent(Event event) {
+                Logger.info("Machine stopped: " + event.getSource());
+            }
+        });
+        eventBus.subscribe("item_completed", new EventSubscriber() {
+            @Override
+            public void onEvent(Event event) {
+                Logger.info("Item completed: " + event.getSource());
+            }
+        });
     }
 
     private void seedDataIfEmpty() {
@@ -119,8 +137,8 @@ public class WorkFlowController {
             Station pack = EntityFactory.createStation("PACKAGING", "ST-03", "ACTIVE", eventBus);
 
             // 2. Create Machines
-            Machine m1 = EntityFactory.createMachine("CUTTER", "M-01", "Drill Press", "IDLE", eventBus);
-            Machine m2 = EntityFactory.createMachine("PACKAGER", "M-02", "Boxer", "IDLE", eventBus);
+            Machine m1 = EntityFactory.createMachine("PROCESSING", "M-01", "Drill Press", "IDLE", eventBus);
+            Machine m2 = EntityFactory.createMachine("PACKAGING", "M-02", "Boxer", "IDLE", eventBus);
 
             // 3. Create Sensors
             // Decoupled: Sensor knows its location, but Station doesn't own it.
@@ -132,7 +150,6 @@ public class WorkFlowController {
 
             // 5. Wire them up
             prod.addMachine(m1);
-            // prod.addSensor(s1); // Removed: Stations do not own sensors anymore
             pack.addMachine(m2);
 
             // 6. Save to Repositories
@@ -226,22 +243,28 @@ public class WorkFlowController {
     }
 
     // User-Defined Configuration Methods
-    public void registerMachine(String id, String name, String typeStr, String stationId) {
+    public void registerMachine(String id, String name, String typeStr) {
         // Enforce validations
         org.Automation.entities.enums.MachineType type = org.Automation.entities.enums.MachineType
                 .valueOf(typeStr.toUpperCase());
-        Station station = stationRepo.findById(stationId);
-        if (station == null) {
-            throw new IllegalArgumentException("Station " + stationId + " not found.");
+
+        // Find matching station
+        Station targetStation = null;
+        for (Station s : stationRepo.findAll()) {
+            if (s.getType() == type.getStationType()) {
+                targetStation = s;
+                break;
+            }
+        }
+
+        if (targetStation == null) {
+            throw new IllegalArgumentException("No suitable station found for machine type " + typeStr);
         }
 
         Machine machine = EntityFactory.createMachine(typeStr, id, name, "IDLE", eventBus);
-        station.addMachine(machine); // Checks type compatibility internally
+        targetStation.addMachine(machine);
 
         machineRepo.save(machine);
-        // Note: station status/list persistence depends on DB structure or memory.
-        // StationRepo doesn't strictly update the list in DB if not relational.
-        // But for simulation runtime, this works.
     }
 
     public void registerProduct(String id) {

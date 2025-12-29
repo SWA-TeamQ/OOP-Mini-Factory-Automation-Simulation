@@ -24,7 +24,7 @@ public class EntityFactory {
 
     public static Machine createMachine(String type, String id, String name, String status, EventBus eventBus) {
         MachineType machineType = MachineType.valueOf(type.toUpperCase());
-        Machine machine = (machineType == MachineType.PACKAGER) ? new PackagingMachine(id, eventBus)
+        Machine machine = (machineType == MachineType.PACKAGING) ? new PackagingMachine(id, eventBus)
                 : new Machine(id, machineType, eventBus);
 
         if (status != null) {

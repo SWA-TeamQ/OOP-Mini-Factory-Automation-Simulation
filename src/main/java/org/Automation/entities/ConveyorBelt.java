@@ -1,6 +1,6 @@
 package org.Automation.entities;
 
-import org.Automation.core.Tickable;
+import org.Automation.engine.Tickable;
 import org.Automation.engine.SimulationClock;
 import org.Automation.core.EventBus;
 
@@ -16,7 +16,7 @@ public class ConveyorBelt implements Tickable {
     private final String id;
     private final int capacity;
     private final int transferDurationTicks; // How many ticks to move from start to end
-    
+
     // Internal class to track an item in transit
     private static class TransitItem {
         ProductItem item;
@@ -36,7 +36,7 @@ public class ConveyorBelt implements Tickable {
         this.capacity = capacity;
         this.transferDurationTicks = transferDurationTicks;
         this.eventBus = eventBus;
-        
+
         // Register with the central clock
         SimulationClock.getInstance().registerTickable(this);
     }
@@ -53,7 +53,8 @@ public class ConveyorBelt implements Tickable {
         if (itemsInTransit.size() < capacity) {
             long currentTick = SimulationClock.getInstance().getLogicalTick();
             itemsInTransit.add(new TransitItem(item, currentTick + transferDurationTicks));
-            eventBus.publish("item_on_conveyor", "Item " + item.getId() + " entered conveyor " + id);
+            eventBus.publish(new org.Automation.events.ConveyorEvent("item_on_conveyor",
+                    "Item " + item.getId() + " entered conveyor " + id));
             return true;
         }
         return false;
@@ -73,8 +74,9 @@ public class ConveyorBelt implements Tickable {
     }
 
     private void deliverItem(ProductItem item) {
-        eventBus.publish("product_delivered", item);
-        eventBus.publish("conveyor_delivery_complete", id); // Signal to the next station
+        eventBus.publish(new org.Automation.events.ProductEvent("product_delivered", item));
+        eventBus.publish(new org.Automation.events.ConveyorEvent("conveyor_delivery_complete", id)); // Signal to the
+                                                                                                     // next station
     }
 
     public boolean isEmpty() {
