@@ -74,4 +74,10 @@ public abstract class Repository<T> {
     public abstract String createTableQuery();
     
     public abstract void save(T entity);
+
+    public void saveAll(List<T> entities) {
+        for (T entity : entities) {
+            save(entity);
+        }
+    }
 }

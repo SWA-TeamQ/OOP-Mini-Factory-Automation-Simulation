@@ -13,9 +13,10 @@ public final class DatabaseManager {
 
     try {
       connection = DriverManager.getConnection(url);
-      System.out.println("Connection to SQLite established.");
+      Logger.system("Connection to SQLite established.");
       return true;
     } catch (SQLException e) {
+      Logger.error("Failed to connect to the database: " + e.getMessage());
       throw new RuntimeException("Failed to connect", e);
     }
   }
@@ -28,10 +29,11 @@ public final class DatabaseManager {
     try {
       if (connection != null) {
         connection.close();
-        System.out.println("Connection closed.");
+        Logger.system("Database connection closed");
       }
       return true;
     } catch (SQLException e) {
+      Logger.error("Failed to disconnect the database: " + e.getMessage());
       throw new RuntimeException("Failed to disconnect", e);
     }
   }
@@ -55,6 +57,7 @@ public final class DatabaseManager {
       bindParams(pstmt, params);
       return pstmt.executeQuery();
     } catch (SQLException e) {
+      Logger.error("Query execution failed: " + e.getMessage());
       throw new RuntimeException("Query execution failed: " + e.getMessage(), e);
     }
   }
@@ -66,6 +69,7 @@ public final class DatabaseManager {
       bindParams(pstmt, params);
       return pstmt.executeUpdate() > 0;
     } catch (SQLException e) {
+      Logger.error("Mutator execution failed: " + e.getMessage());
       throw new RuntimeException("Mutator execution failed: " + e.getMessage(), e);
     }
   }
@@ -84,8 +88,10 @@ public final class DatabaseManager {
   // ------------ INSERT -------------
   public boolean insert(String tableName, String[] columns, Object[] values) {
 
-    if (columns.length != values.length)
+    if (columns.length != values.length){
+      Logger.error("Columns and values length mismatch");
       throw new IllegalArgumentException("Columns and values length mismatch");
+    }
 
     String cols = String.join(", ", columns);
 
@@ -121,6 +127,9 @@ public final class DatabaseManager {
     return executeMutator(sql, params);
   }
 
+
+  // ------------ Clear Database -------------
+
   public void clearDatabase() {
     try (Statement stmt = connection.createStatement()) {
       stmt.execute("DROP TABLE IF EXISTS Station");
@@ -128,8 +137,9 @@ public final class DatabaseManager {
       stmt.execute("DROP TABLE IF EXISTS ProductItem");
       stmt.execute("DROP TABLE IF EXISTS Sensor");
       stmt.execute("DROP TABLE IF EXISTS ConveyorBelt");
-      System.out.println("Database cleared successfully.");
+      Logger.system("Database cleared successfully.");
     } catch (SQLException e) {
+      Logger.error("Failed to clear database: " + e.getMessage());
       throw new RuntimeException("Failed to clear database", e);
     }
   }
