@@ -1,20 +1,16 @@
 package org.automation.events;
 
-import org.automation.core.Logger;
+import org.automation.entities.ProductItem;
+import org.automation.events.abstracts.ProductEvent;
 
-public class ProductMovedEvent {
-    private final String productId;
+public class ProductMovedEvent extends ProductEvent {
     private final String fromStationId;
     private final String toStationId;
 
-    public ProductMovedEvent(String productId, String fromStationId, String toStationId) {
-        this.productId = productId;
+    public ProductMovedEvent(ProductItem productItem, String fromStationId, String toStationId) {
+        super("ProductMovedEvent", productItem);
         this.fromStationId = fromStationId;
         this.toStationId = toStationId;
-    }
-
-    public String getProductId() {
-        return productId;
     }
 
     public String getFromStationId() {
@@ -26,7 +22,7 @@ public class ProductMovedEvent {
     }
 
     @Override
-    public String toString(){
-        return "Product " + productId + " moved from " + fromStationId + " to " + toStationId;
+    public String toString() {
+        return "Product " + getProductId() + " moved from " + fromStationId + " to " + toStationId;
     }
 }

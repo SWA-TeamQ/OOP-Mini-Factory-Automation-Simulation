@@ -9,7 +9,7 @@ import java.util.Map;
 import org.automation.core.DatabaseManager;
 import org.automation.core.EntityFactory;
 import org.automation.core.EventBus;
-import org.automation.entities.Station;
+import org.automation.entities.abstracts.Station;
 
 import java.util.ArrayList;
 

@@ -1,8 +1,10 @@
-package org.automation.entities;
+package org.automation.entities.abstracts;
 
 import java.util.*;
 
 import org.automation.core.*;
+import org.automation.core.interfaces.EventSubscriber;
+import org.automation.entities.ProductItem;
 import org.automation.entities.enums.*;
 import org.automation.events.*;
 
@@ -10,7 +12,7 @@ import org.automation.events.*;
  * Represents a physical location in the production line.
  * Orchestrates machines and publishes product events.
  */
-public abstract class Station {
+public abstract class Station implements EventSubscriber {
     protected final String id;
     protected final StationType type;
     protected StationStatus status;
@@ -33,24 +35,33 @@ public abstract class Station {
         return type;
     }
 
-    public void addMachine(Machine machine) {
-        if (machine.getType().getStationType() != this.type) {
-            throw new IllegalArgumentException(
-                    "Station " + id + " (" + type + ") cannot accept machine " + machine.getType());
-        }
-        machines.add(machine);
-    }
-
-    public List<Machine> getMachines() {
-        return machines;
-    }
-
     public StationStatus getStatus() {
         return status;
     }
 
     public void setStatus(StationStatus status) {
         this.status = status;
+    }
+
+    public List<Machine> getMachines() {
+        return machines;
+    }
+
+    public void addMachine(Machine machine) {
+        if (machine.getType().getStationType() != this.type) {
+            Logger.error("Station " + id + " (" + type + ") cannot accept machine " + machine.getType());
+            throw new IllegalArgumentException(
+                    "Station " + id + " (" + type + ") cannot accept machine " + machine.getType());
+        }
+        machines.add(machine);
+    }
+
+    public List<ProductItem> getItems() {
+        return new ArrayList<>(waitingQueue);
+    }
+
+    public void removeItem(ProductItem item) {
+        waitingQueue.remove(item);
     }
 
     /**
@@ -63,23 +74,10 @@ public abstract class Station {
         processQueue();
     }
 
-    public List<ProductItem> getItems() {
-        return new ArrayList<>(waitingQueue);
-    }
+    public void onEvent(ProductArrivedEvent event) {
+        String productId = event.getProductId();
+        waitingQueue.add(ProductItemRepository.getProductById(productId));
 
-    public void removeItem(ProductItem item) {
-        waitingQueue.remove(item);
-    }
-
-    @Override
-    public String toString() {
-        return "Station{" +
-                "id='" + id + '\'' +
-                ", type=" + type +
-                ", machines=" + machines.size() +
-                ", waiting=" + waitingQueue.size() +
-                ", status=" + status +
-                '}';
     }
 
     /**
@@ -96,6 +94,7 @@ public abstract class Station {
 
             if (m.getStatus() == MachineStatus.IDLE) {
                 ProductItem item = waitingQueue.peek();
+
                 if (m.assignItem(item)) {
                     waitingQueue.poll();
                     // Station publishes the assignment event

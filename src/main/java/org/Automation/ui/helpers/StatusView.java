@@ -1,6 +1,6 @@
 package org.automation.ui.helpers;
 
-import org.automation.entities.Machine;
+import org.automation.entities.abstracts.Machine;
 import org.automation.repositories.MachineRepository;
 
 public class StatusView {

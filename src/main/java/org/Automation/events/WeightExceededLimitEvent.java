@@ -1,22 +1,20 @@
 package org.automation.events;
 
+import org.automation.entities.ProductItem;
+import org.automation.events.abstracts.ProductSensorEvent;
+
 /**
  * Raised when weight measurement exceeds the threshold.
  */
-public class WeightExceededLimitEvent extends Event {
-    private final String productId;
+public class WeightExceededLimitEvent extends ProductSensorEvent {
+
     private final double measuredValue;
     private final double threshold;
 
-    public WeightExceededLimitEvent(String productId, double measuredValue, double threshold) {
-        super("WeightExceededLimitEvent");
-        this.productId = productId;
+    public WeightExceededLimitEvent(ProductItem productItem, double measuredValue, double threshold) {
+        super("WeightExceededLimitEvent", productItem);
         this.measuredValue = measuredValue;
         this.threshold = threshold;
-    }
-
-    public String getProductId() {
-        return productId;
     }
 
     public double getMeasuredValue() {
@@ -29,7 +27,7 @@ public class WeightExceededLimitEvent extends Event {
 
     @Override
     public String toString() {
-        return "Product " + productId + " exceeded weight limit: " +
+        return "Product " + getProductId() + " exceeded weight limit: " +
                 "measured " + measuredValue + ", threshold " + threshold;
     }
 }

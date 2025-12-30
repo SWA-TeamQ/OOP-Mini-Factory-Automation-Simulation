@@ -1,22 +1,19 @@
 package org.automation.events;
 
+import org.automation.entities.ProductItem;
+import org.automation.events.abstracts.ProductEvent;
+
 /**
  * Raised when a product completes the entire production line.
  */
-public class ProductFinishedEvent extends Event {
-    private final String productId;
+public class ProductFinishedEvent extends ProductEvent {
     private final long completionTick;
     private final long totalDuration;
 
-    public ProductFinishedEvent(String productId, long completionTick, long totalDuration) {
-        super("ProductFinishedEvent");
-        this.productId = productId;
+    public ProductFinishedEvent(ProductItem productItem, long completionTick, long totalDuration) {
+        super("ProductFinishedEvent", productItem);
         this.completionTick = completionTick;
         this.totalDuration = totalDuration;
-    }
-
-    public String getProductId() {
-        return productId;
     }
 
     public long getCompletionTick() {
@@ -29,7 +26,7 @@ public class ProductFinishedEvent extends Event {
 
     @Override
     public String toString() {
-        return "Product " + productId + " finished at tick " + completionTick +
+        return "Product " + productItem.getId() + " finished at tick " + completionTick +
                 " with total duration " + totalDuration;
     }
 }

@@ -5,6 +5,7 @@ import org.automation.core.interfaces.EventSubscriber;
 import org.automation.engine.SimulationClock;
 import org.automation.entities.*;
 import org.automation.events.*;
+import org.automation.events.abstracts.Event;
 import org.automation.repositories.*;
 import org.automation.services.interfaces.IItemTrackingService;
 

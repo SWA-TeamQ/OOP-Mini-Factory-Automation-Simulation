@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import org.automation.core.DatabaseManager;
 import org.automation.core.EntityFactory;
 import org.automation.core.EventBus;
-import org.automation.entities.Machine;
+import org.automation.entities.abstracts.Machine;
 
 public class MachineRepository extends Repository<Machine> {
 

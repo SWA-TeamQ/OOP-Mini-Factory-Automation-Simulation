@@ -1,6 +1,7 @@
 package org.automation.entities;
 
 import org.automation.core.*;
+import org.automation.entities.abstracts.Sensor;
 import org.automation.events.*;
 
 /**

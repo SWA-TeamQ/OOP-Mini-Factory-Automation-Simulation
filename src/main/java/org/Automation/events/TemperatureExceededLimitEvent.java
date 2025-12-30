@@ -1,22 +1,19 @@
 package org.automation.events;
 
+import org.automation.entities.ProductItem;
+import org.automation.events.abstracts.ProductSensorEvent;
+
 /**
  * Raised when temperature measurement exceeds the threshold.
  */
-public class TemperatureExceededLimitEvent extends Event {
-    private final String productId;
+public class TemperatureExceededLimitEvent extends ProductSensorEvent {
     private final double measuredValue;
     private final double threshold;
 
-    public TemperatureExceededLimitEvent(String productId, double measuredValue, double threshold) {
-        super("TemperatureExceededLimitEvent");
-        this.productId = productId;
+    public TemperatureExceededLimitEvent(ProductItem productItem, double measuredValue, double threshold) {
+        super("TemperatureExceededLimitEvent", productItem);
         this.measuredValue = measuredValue;
         this.threshold = threshold;
-    }
-
-    public String getProductId() {
-        return productId;
     }
 
     public double getMeasuredValue() {
@@ -29,7 +26,7 @@ public class TemperatureExceededLimitEvent extends Event {
 
     @Override
     public String toString() {
-        return "Product " + productId + " exceeded temperature limit: " +
+        return "Product " + getProductId() + " exceeded temperature limit: " +
                 "measured " + measuredValue + ", threshold " + threshold;
     }
 }

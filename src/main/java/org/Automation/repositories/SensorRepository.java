@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import org.automation.core.DatabaseManager;
 import org.automation.core.EntityFactory;
 import org.automation.core.EventBus;
-import org.automation.entities.Sensor;
+import org.automation.entities.abstracts.Sensor;
 
 public class SensorRepository extends Repository<Sensor> {
     private final EventBus eventBus;

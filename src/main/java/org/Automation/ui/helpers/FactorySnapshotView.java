@@ -1,6 +1,6 @@
 package org.automation.ui.helpers;
 
-import org.automation.entities.Station;
+import org.automation.entities.abstracts.Station;
 import org.automation.repositories.StationRepository;
 
 public class FactorySnapshotView {

@@ -4,6 +4,7 @@ import java.util.*;
 
 import org.automation.core.interfaces.EventSubscriber;
 import org.automation.events.*;
+import org.automation.events.abstracts.Event;
 
 public class EventBus {
     private final HashMap<String, List<EventSubscriber>> listeners = new HashMap<>();

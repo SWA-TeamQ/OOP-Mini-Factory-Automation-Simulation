@@ -1,4 +1,4 @@
-package org.automation.events;
+package org.automation.events.abstracts;
 
 import org.automation.engine.SimulationClock;
 

@@ -1,4 +1,4 @@
-package org.automation.entities;
+package org.automation.entities.abstracts;
 
 import java.util.Random;
 

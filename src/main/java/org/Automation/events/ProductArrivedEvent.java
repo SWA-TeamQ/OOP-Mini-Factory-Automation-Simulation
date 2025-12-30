@@ -1,20 +1,17 @@
 package org.automation.events;
 
+import org.automation.entities.ProductItem;
+import org.automation.events.abstracts.ProductEvent;
+
 /**
  * Raised when a product arrives at a station.
  */
-public class ProductArrivedEvent extends Event {
-    private final String productId;
+public class ProductArrivedEvent extends ProductEvent {
     private final String stationId;
 
-    public ProductArrivedEvent(String productId, String stationId) {
-        super("ProductArrivedEvent");
-        this.productId = productId;
+    public ProductArrivedEvent(ProductItem productItem, String stationId) {
+        super("ProductArrivedEvent", productItem);
         this.stationId = stationId;
-    }
-
-    public String getProductId() {
-        return productId;
     }
 
     public String getStationId() {
@@ -23,6 +20,6 @@ public class ProductArrivedEvent extends Event {
 
     @Override
     public String toString() {
-        return "Product " + productId + " arrived at station " + stationId;
+        return "Product " + getProductId() + " arrived at station " + stationId;
     }
 }

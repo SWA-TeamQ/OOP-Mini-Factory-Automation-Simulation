@@ -2,6 +2,7 @@ package org.automation.services;
 
 import org.automation.core.*;
 import org.automation.entities.*;
+import org.automation.entities.abstracts.Sensor;
 import org.automation.repositories.*;
 import org.automation.services.interfaces.ISensorService;
 

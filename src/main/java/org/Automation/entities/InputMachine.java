@@ -1,11 +1,10 @@
 package org.automation.entities;
-
 import org.automation.entities.abstracts.Machine;
 import org.automation.entities.enums.MachineType;
 
-public class PackagingMachine extends Machine {
+public class InputMachine extends Machine{
 
-    public PackagingMachine(String id) {
-        super(id, MachineType.PACKAGING);
+    public InputMachine(String id) {
+        super(id, MachineType.INPUT);
     }
 }

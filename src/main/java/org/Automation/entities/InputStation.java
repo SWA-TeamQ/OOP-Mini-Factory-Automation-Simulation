@@ -1,8 +1,10 @@
 package org.automation.entities;
 
 import org.automation.core.EventBus;
-import org.automation.entities.enums.StationStatus;
-import org.automation.entities.enums.StationType;
+import org.automation.entities.abstracts.Station;
+import org.automation.entities.enums.*;
+import org.automation.core.*;
+import java.util.*;
 
 public class InputStation extends Station {
 
@@ -22,7 +24,7 @@ public class InputStation extends Station {
     public void processItems() {
         // InputStation just produces items, then signals they are ready for transfer
         // Note: waitingQueue is protected in base class
-        for (ProductItem item : new java.util.ArrayList<>(waitingQueue)) {
+        for (ProductItem item : new ArrayList<>(waitingQueue)) {
             onProductReadyForTransfer(item);
             waitingQueue.remove(item);
         }
@@ -33,6 +35,6 @@ public class InputStation extends Station {
         // Logic should be handled by polling or direct assignment if applicable.
         // For now, we log that it's ready. The ProductionLineService likely picks it
         // up.
-        org.automation.core.Logger.info("InputStation: Product " + item.getId() + " ready for transfer.");
+        Logger.info("InputStation: Product " + item.getId() + " ready for transfer.");
     }
 }

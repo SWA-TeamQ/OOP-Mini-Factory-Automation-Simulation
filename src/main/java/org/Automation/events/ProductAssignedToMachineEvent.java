@@ -1,20 +1,17 @@
 package org.automation.events;
 
+import org.automation.events.abstracts.ProductEvent;
+import org.automation.entities.ProductItem;
+
 /**
  * Raised when a product is assigned to a machine for processing.
  */
-public class ProductAssignedToMachineEvent extends Event {
-    private final String productId;
+public class ProductAssignedToMachineEvent extends ProductEvent {
     private final String machineId;
 
-    public ProductAssignedToMachineEvent(String productId, String machineId) {
-        super("ProductAssignedToMachineEvent");
-        this.productId = productId;
+    public ProductAssignedToMachineEvent(ProductItem productItem, String machineId) {
+        super("ProductAssignedToMachineEvent", productItem);
         this.machineId = machineId;
-    }
-
-    public String getProductId() {
-        return productId;
     }
 
     public String getMachineId() {
@@ -23,6 +20,6 @@ public class ProductAssignedToMachineEvent extends Event {
 
     @Override
     public String toString() {
-        return "Product " + productId + " assigned to machine " + machineId;
+        return "Product " + getProductId() + " assigned to machine " + machineId;
     }
 }

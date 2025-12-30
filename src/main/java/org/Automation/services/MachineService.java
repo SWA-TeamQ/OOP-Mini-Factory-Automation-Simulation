@@ -2,18 +2,16 @@ package org.automation.services;
 
 import org.automation.core.EventBus;
 import org.automation.core.Logger;
-import org.automation.entities.Machine;
 import org.automation.entities.ProductItem;
+import org.automation.entities.abstracts.Machine;
 import org.automation.repositories.MachineRepository;
 import org.automation.services.interfaces.IMachineService;
 
 public class MachineService implements IMachineService {
     private final MachineRepository machineRepo;
-    private final EventBus eventBus;
 
     public MachineService(MachineRepository machineRepo, EventBus eventBus) {
         this.machineRepo = machineRepo;
-        this.eventBus = eventBus;
     }
 
     @Override

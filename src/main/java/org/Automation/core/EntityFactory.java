@@ -1,6 +1,10 @@
 package org.automation.core;
 
+import org.automation.engine.SimulationClock;
 import org.automation.entities.*;
+import org.automation.entities.abstracts.Machine;
+import org.automation.entities.abstracts.Sensor;
+import org.automation.entities.abstracts.Station;
 import org.automation.entities.enums.*;
 
 /**
@@ -16,7 +20,7 @@ public class EntityFactory {
 
         Station station = switch (type.toUpperCase()) {
             case INPUT -> new InputStation(id, eventBus);
-            case PROCESSING -> new ProductionStation(id, eventBus);
+            case PROCESSING -> new ProcessingStation(id, eventBus);
             case PACKAGING -> new PackagingStation(id, eventBus);
             default -> throw new IllegalArgumentException("Unknown station type: " + type);
         };
@@ -30,22 +34,22 @@ public class EntityFactory {
         type = type.toUpperCase();
 
         MachineType machineType = MachineType.valueOf(type);
-            Machine machine;
+        Machine machine = null;
 
         switch (machineType){
             case INPUT:
+                machine = new InputMachine(id);
                 break;
 
             case PROCESSING:
+                machine = new ProcessingMachine(id);
                 break;
-
-            case PACKAGING:
-                break;
-        }
-
-        machine = (machineType == MachineType.PACKAGING) ? new PackagingMachine(id)
-                : new Machine(id, machineType);
-
+                
+                case PACKAGING:
+                    break;
+                }
+                
+        SimulationClock.getInstance().registerTickable(machine);
         if (status != null) {
             machine.setStatus(MachineStatus.valueOf(status.toUpperCase()));
         }
