@@ -20,4 +20,9 @@ public class ProductAssignedToMachineEvent extends Event {
     public String getMachineId() {
         return machineId;
     }
+
+    @Override
+    public String toString() {
+        return "Product " + productId + " assigned to machine " + machineId;
+    }
 }

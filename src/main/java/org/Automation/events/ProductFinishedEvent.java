@@ -26,4 +26,10 @@ public class ProductFinishedEvent extends Event {
     public long getTotalDuration() {
         return totalDuration;
     }
+
+    @Override
+    public String toString() {
+        return "Product " + productId + " finished at tick " + completionTick +
+                " with total duration " + totalDuration;
+    }
 }

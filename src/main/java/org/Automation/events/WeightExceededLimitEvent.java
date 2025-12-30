@@ -26,4 +26,10 @@ public class WeightExceededLimitEvent extends Event {
     public double getThreshold() {
         return threshold;
     }
+
+    @Override
+    public String toString() {
+        return "Product " + productId + " exceeded weight limit: " +
+                "measured " + measuredValue + ", threshold " + threshold;
+    }
 }

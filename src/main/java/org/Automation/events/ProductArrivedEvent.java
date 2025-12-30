@@ -20,4 +20,9 @@ public class ProductArrivedEvent extends Event {
     public String getStationId() {
         return stationId;
     }
+
+    @Override
+    public String toString() {
+        return "Product " + productId + " arrived at station " + stationId;
+    }
 }
